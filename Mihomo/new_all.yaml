@@ -1,6 +1,6 @@
 ### 全局配置
 mixed-port: 7897
-allow-lan: true
+allow-lan: false
 mode: rule
 log-level: warning
 ipv6: false
@@ -79,173 +79,213 @@ proxy-groups:
 
   # 应用策略组
   - {name: ✨ AI, type: select, proxies: [国外策略, 国内策略]}
-  - {name: ✨ AI2, type: select, proxies: [国外策略, 国内策略]}
-  - {name: 📘 GitHub, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 📘 GitHub, type: select, proxies: [国外策略, 国内策略]}
   - {name: 👯‍♂️ TikTok, type: select, proxies: [国外策略]}
   - {name: 🙋 Telegram, type: select, proxies: [国外策略]}
   - {name: 🕊️ Twitter(X), type: select, proxies: [国外策略]}
   - {name: 🗣️ Facebook, type: select, proxies: [国外策略]}
-  - {name: 🌳 Amazon, type: select, proxies: [国内策略, 国外策略]}
-  - {name: 🍎 Apple, type: select, proxies: [国内策略, 国外策略]}
-  - {name: Ⓜ️ Microsoft, type: select, proxies: [国内策略, 国外策略]}
-  - {name: 🎮 Steam, type: select, proxies: [国内策略, 国外策略]}
-  - {name: 🕹️ Game (Epic), type: select, proxies: [国内策略, 国外策略]}
-  - {name: 🕹️ Game (EA), type: select, proxies: [国内策略, 国外策略]}
-  - {name: 🕹️ Game (Blizzard), type: select, proxies: [国内策略, 国外策略]}
-  - {name: 🕹️ Game (UBI), type: select, proxies: [国内策略, 国外策略]}
-  - {name: 🕹️ Game (Sony), type: select, proxies: [国内策略, 国外策略]}
-  - {name: 🕹️ Game (Nintendo), type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🌳 Amazon, type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🍎 Apple, type: select, proxies: [国外策略, 国内策略]}
+  - {name: Ⓜ️ Microsoft, type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🎮 Steam, type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🕹️ Game (Epic), type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🕹️ Game (EA), type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🕹️ Game (Blizzard), type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🕹️ Game (UBI), type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🕹️ Game (Sony), type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🕹️ Game (Nintendo), type: select, proxies: [国外策略, 国内策略]}
   - {name: 🎞️ YouTube, type: select, proxies: [国外策略]}
   - {name: 📺 Disney, type: select, proxies: [国外策略]}
   - {name: 🎥 Netflix, type: select, proxies: [国外策略]}
   - {name: 🎬 HBO, type: select, proxies: [国外策略]}
   - {name: 🎵 Spotify, type: select, proxies: [国外策略]}
-  - {name: 🇬🇴 Google, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🇬🇴 Google, type: select, proxies: [国外策略, 国内策略]}
   - {name: 🌍 国外, type: select, proxies: [国外策略]}
   - {name: ➡️ 国内, type: select, proxies: [国内策略]}
   - {name: 🛑 广告, type: select, proxies: [REJECT, 国内策略, 国外策略]}
   - {name: 🔒 隐私, type: select, proxies: [REJECT, 国内策略, 国外策略]}
-  - {name: 🚫 恶意, type: select, proxies: [REJECT, 国内策略, 国外策略]}
-  - {name: 🎯 全球直连, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🎯 全球直连, type: select, proxies: [国外策略, 国内策略]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [国外策略, 国内策略, DIRECT]}
 
-# 规则集定义（已修复）
-RuleSet_classical: &RuleSet_classical {type: http, behavior: classical, interval: 43200, format: text, proxy: 国内策略}
-RuleSet_domain: &RuleSet_domain {type: http, behavior: domain, interval: 43200, format: text, proxy: 国内策略}
-RuleSet_ipcidr: &RuleSet_ipcidr {type: http, behavior: ipcidr, interval: 43200, format: text, proxy: 国内策略}
+# 规则集定义
+RuleSet_classical: &RuleSet_classical {type: http, behavior: classical, interval: 43200, format: text, proxy: 国外策略}
+RuleSet_domain: &RuleSet_domain {type: http, behavior: domain, interval: 43200, format: text, proxy: 国外策略}
+RuleSet_ipcidr: &RuleSet_ipcidr {type: http, behavior: ipcidr, interval: 43200, format: text, proxy: 国外策略}
 
 ### 规则集
 rule-providers:
-  reject_non_ip_no_drop:
-    <<: *RuleSet_classical
-    url: 'https://ruleset.skk.moe/Clash/non_ip/reject-no-drop.txt'
-    path: './rule_set/sukkaw_ruleset/reject_non_ip_no_drop.txt'
-  reject_non_ip_drop:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/reject-drop.txt
-    path: ./rule_set/sukkaw_ruleset/reject_non_ip_drop.txt
-  reject_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/reject.txt
-    path: ./rule_set/sukkaw_ruleset/reject_non_ip.txt
-  reject_domainset:
+  AI:
     <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/reject.txt
-    path: ./rule_set/sukkaw_ruleset/reject_domainset.txt
-  reject_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/ip/reject.txt
-    path: ./rule_set/sukkaw_ruleset/reject_ip.txt
-  cdn_domainset:
+    url: https://raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/AI.list
+    path: ./ruleset/ai.list
+    interval: 86400
+  GitHub:
     <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/cdn.txt
-    path: ./rule_set/sukkaw_ruleset/cdn_domainset.txt
-  cdn_non_ip:
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.list
+    path: ./ruleset/github.list
+    interval: 86400
+  TikTok:
     <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/non_ip/cdn.txt
-    path: ./rule_set/sukkaw_ruleset/cdn_non_ip.txt
-  stream_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/stream.txt
-    path: './rule_set/sukkaw_ruleset/stream_non_ip.txt'
-  stream_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/ip/stream.txt
-    path: './rule_set/sukkaw_ruleset/stream_ip.txt'
-  ai_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/ai.txt'
-    path: './rule_set/sukkaw_ruleset/ai_non_ip.txt'
-  telegram_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/telegram.txt
-    path: './rule_set/sukkaw_ruleset/telegram_non_ip.txt'
-  telegram_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/ip/telegram.txt
-    path: './rule_set/sukkaw_ruleset/telegram_ip.txt'
-  apple_cdn:
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/TikTok/TikTok.list
+    path: ./ruleset/tiktok.list
+    interval: 86400
+  Telegram:
     <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/apple_cdn.txt'
-    path: './rule_set/sukkaw_ruleset/apple_cdn.txt'
-  apple_services:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/apple_services.txt'
-    path: './rule_set/sukkaw_ruleset/apple_services.txt'
-  apple_cn_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/apple_cn.txt'
-    path: './rule_set/sukkaw_ruleset/apple_cn_non_ip.txt'
-  microsoft_cdn_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/microsoft_cdn.txt'
-    path: './rule_set/sukkaw_ruleset/microsoft_cdn_non_ip.txt'
-  microsoft_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/microsoft.txt'
-    path: './rule_set/sukkaw_ruleset/microsoft_non_ip.txt'
-  download_domainset:
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram.list
+    path: ./ruleset/telegram.list
+    interval: 86400
+  Twitter:
     <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/download.txt'
-    path: './rule_set/sukkaw_ruleset/download_domainset.txt'
-  download_non_ip:
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.list
+    path: ./ruleset/twitter.list
+    interval: 86400
+  Facebook:
     <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/non_ip/download.txt'
-    path: './rule_set/sukkaw_ruleset/download_non_ip.txt'
-  lan_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/lan.txt'
-    path: './rule_set/sukkaw_ruleset/lan_non_ip.txt'
-  lan_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/ip/lan.txt'
-    path: './rule_set/sukkaw_ruleset/lan_ip.txt'
-  domestic_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/domestic.txt'
-    path: './rule_set/sukkaw_ruleset/domestic_non_ip.txt'
-  direct_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/direct.txt'
-    path: './rule_set/sukkaw_ruleset/direct_non_ip.txt'
-  global_non_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/global.txt'
-    path: './rule_set/sukkaw_ruleset/global_non_ip.txt'
-  domestic_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/ip/domestic.txt'
-    path: './rule_set/sukkaw_ruleset/domestic_ip.txt'
-  china_ip:
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Facebook/Facebook.list
+    path: ./ruleset/facebook.list
+    interval: 86400
+  Amazon:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Amazon/Amazon.list
+    path: ./ruleset/amazon.list
+    interval: 86400
+  Apple:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple.list
+    path: ./ruleset/apple.list
+    interval: 86400
+  Microsoft:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.list
+    path: ./ruleset/microsoft.list
+    interval: 86400
+  Steam:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Steam/Steam.list
+    path: ./ruleset/steam.list
+    interval: 86400
+  Epic:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Epic/Epic.list
+    path: ./ruleset/epic.list
+    interval: 86400
+  EA:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/EA/EA.list
+    path: ./ruleset/ea.list
+    interval: 86400
+  Blizzard:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Blizzard/Blizzard.list
+    path: ./ruleset/blizzard.list
+    interval: 86400
+  UBI:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/UBI/UBI.list
+    path: ./ruleset/ubi.list
+    interval: 86400
+  Sony:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Sony/Sony.list
+    path: ./ruleset/sony.list
+    interval: 86400
+  Nintendo:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Nintendo/Nintendo.list
+    path: ./ruleset/nintendo.list
+    interval: 86400
+  YouTube:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/YouTube.list
+    path: ./ruleset/youtube.list
+    interval: 86400
+  Disney:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.list
+    path: ./ruleset/disney.list
+    interval: 86400
+  Netflix:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.list
+    path: ./ruleset/netflix.list
+    interval: 86400
+  HBO:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/HBO/HBO.list
+    path: ./ruleset/hbo.list
+    interval: 86400
+  Spotify:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.list
+    path: ./ruleset/spotify.list
+    interval: 86400
+  Google:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.list
+    path: ./ruleset/google.list
+    interval: 86400
+  Global:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global.list
+    path: ./ruleset/global.list
+    interval: 86400
+  CN_IP:
     <<: *RuleSet_ipcidr
-    url: https://ruleset.skk.moe/Clash/ip/china_ip.txt'
-    path: './rule_set/sukkaw_ruleset/china_ip.txt'
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaIPs/ChinaIPs_Classical.yaml
+    path: ./ruleset/ChinaIPs_Classical.yaml
+    interval: 86400
+  CN:
+    <<: *RuleSet_classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/China/China.list
+    path: ./ruleset/China.list
+    interval: 86400
+  Ad_Base:
+    <<: *RuleSet_classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Advertising/Advertising.yaml
+    path: ./ruleset/Advertising.yaml
+    interval: 86400
+  Privacy:
+    <<: *RuleSet_classical
+    url: https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_3_Spyware/filter.txt
+    path: ./ruleset/privacy.list
+    interval: 86400
+  Global_Direct:
+    <<: *RuleSet_classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Direct/Direct.list
+    path: ./ruleset/global_direct.list
+    interval: 86400
 
 ### 分流规则
 rules:
-  - RULE-SET,reject_non_ip,REJECT
-  - RULE-SET,reject_domainset,REJECT
-  - RULE-SET,reject_non_ip_drop,REJECT-DROP
-  - RULE-SET,reject_non_ip_no_drop,REJECT
-  - RULE-SET,reject_ip,REJECT
-  - RULE-SET,stream_non_ip,国外策略
-  - RULE-SET,stream_ip,国外策略
-  - RULE-SET,ai_non_ip,国外策略
-  - RULE-SET,telegram_non_ip,国外策略
-  - RULE-SET,telegram_ip,国外策略
-  - RULE-SET,apple_cdn,国内策略
-  - RULE-SET,apple_services,国内策略
-  - RULE-SET,apple_cn_non_ip,国内策略
-  - RULE-SET,microsoft_cdn_non_ip,国内策略
-  - RULE-SET,microsoft_non_ip,国内策略
-  - RULE-SET,download_domainset,国内策略
-  - RULE-SET,download_non_ip,国内策略
-  - RULE-SET,lan_non_ip,国内策略
-  - RULE-SET,lan_ip,国内策略,no-resolve
-  - RULE-SET,domestic_non_ip,国内策略
-  - RULE-SET,direct_non_ip,国内策略
-  - RULE-SET,global_non_ip,国外策略
-  - RULE-SET,domestic_ip,国内策略
-  - RULE-SET,china_ip,国内策略
-  - GEOIP,CN,国内策略,no-resolve
-  - MATCH,国外策略
+  - RULE-SET,Ad_Base,🛑 广告
+  - RULE-SET,Privacy,🔒 隐私
+
+  - RULE-SET,AI,✨ AI
+  - RULE-SET,TikTok,👯‍♂️ TikTok
+  - RULE-SET,Telegram,🙋 Telegram
+  - RULE-SET,Twitter,🕊️ Twitter(X)
+  - RULE-SET,Facebook,🗣️ Facebook
+  - RULE-SET,YouTube,🎞️ YouTube
+  - RULE-SET,Disney,📺 Disney
+  - RULE-SET,Netflix,🎥 Netflix
+  - RULE-SET,HBO,🎬 HBO
+  - RULE-SET,Spotify,🎵 Spotify
+  - RULE-SET,GitHub,📘 GitHub
+  - RULE-SET,Amazon,🌳 Amazon
+  - RULE-SET,Apple,🍎 Apple
+  - RULE-SET,Microsoft,Ⓜ️ Microsoft
+  - RULE-SET,Google,🇬🇴 Google
+  - RULE-SET,Steam,🎮 Steam
+  - RULE-SET,Epic,🕹️ Game (Epic)
+  - RULE-SET,EA,🕹️ Game (EA)
+  - RULE-SET,Blizzard,🕹️ Game (Blizzard)
+  - RULE-SET,UBI,🕹️ Game (UBI)
+  - RULE-SET,Sony,🕹️ Game (Sony)
+  - RULE-SET,Nintendo,🕹️ Game (Nintendo)
+  - RULE-SET,Global,🌍 国外
+  - RULE-SET,CN,➡️ 国内
+  - RULE-SET,CN_IP,➡️ 国内
+
+  - GEOIP,CN_IP,➡️ 国内,no-resolve
+  
+  - MATCH,🐟 漏网之鱼
