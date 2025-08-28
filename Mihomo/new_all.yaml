@@ -60,7 +60,7 @@ tun:
 
 # 节点筛选
 FilterAll: &FilterAll '^(?=.*(.))(?!.*((?i)群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|(\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author)\b|(\d{4}-\d{2}-\d{2}|\d+G)))).*$'
-FilterCN: &FilterCN '^(?=.*(中国|大陆|陆|China|CN|Shanghai|北京|Beijing|广州|Guangzhou|深圳|Shenzhen|杭州|Hangzhou|成都|Chengdu|内蒙古|内蒙|Inner|浙江|Zhejiang|江苏|Jiangsu|江西|Jiangxi|湖南|Hunan|湖北|Hubei|河南|Henan|河北|Hebei|山东|Shandong|山西|Shanxi|陕西|Shaanxi|四川|Sichuan|广东|Guangdong|广西|Guangxi|福建|Fujian|安徽|Anhui|辽宁|Liaoning|吉林|Jilin|黑龙江|Heilongjiang|重庆|Chongqing|天津|Tianjin|云南|Yunnan|贵州|Guizhou|海南|Hainan|甘肃|Gansu|青海|Qinghai|宁夏|Ningxia|西藏|Tibet|新疆|Xinjiang|移动|联通|电信|铁通|广电|China\s(Mobile|Unicom|Telecom|Broadnet)|cm|cu|ct|cn|cmi|cuci))^(?!.*(网站|地址|剩余|过期|时间|有效|网址|禁止|邮箱|发布|客服|订阅|节点|落地|家宽|自建|×)).*$'
+FilterCN: &FilterCN '^(?=.*(中国|大陆|China|CN|cn|北京|上海|广州|深圳|杭州|成都|重庆|天津|武汉|西安|南京|苏州|青岛|大连|厦门|福州|长沙|郑州|济南|沈阳|长春|哈尔滨|石家庄|太原|兰州|银川|西宁|乌鲁木齐|拉萨|昆明|贵阳|南宁|海口|南昌|合肥|呼和浩特|河北|山西|辽宁|吉林|黑龙江|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|广西|海南|四川|贵州|云南|西藏|陕西|甘肃|青海|宁夏|新疆|内蒙古|移动|联通|电信|广电))^(?!.*(网站|地址|剩余|过期|时间|有效|网址|禁止|邮箱|发布|客服|订阅|节点|落地|家宽|自建)).*$'
 
 Select: &Select {type: select, url: 'https://cp.cloudflare.com/generate_204', disable-udp: false, hidden: false, include-all: true}
 Auto: &Auto {type: url-test, url: 'https://cp.cloudflare.com/generate_204', interval: 300, tolerance: 50, disable-udp: false, hidden: true, include-all: true}
