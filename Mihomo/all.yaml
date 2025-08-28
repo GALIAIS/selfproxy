@@ -129,8 +129,8 @@ rule-providers:
   GitHub:
     type: http
     behavior: domain
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.list
-    path: ./ruleset/github.list
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/github.mrs
+    path: ./rule_provider/github_domain.mrs
     interval: 86400
   TikTok:
     type: http
@@ -453,14 +453,14 @@ rule-providers:
   fakeip-filter:
     type: http
     behavior: domain
-    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/fakeip-filter.mrs
-    path: ./rule_set/other_ruleset/fakeip-filter.mrs
+    url: https://github.com/DustinWin/ruleset_geodata/raw/refs/heads/mihomo-ruleset/fakeip-filter.mrs
+    path: ./rule_provider/Fake-IP-Filter.mrs
     interval: 86400
   private:
     type: http
     behavior: domain
-    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/private.mrs
-    path: ./rule_set/other_ruleset/private.mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/private.mrs
+    path: ./rule_provider/private_domain.mrs
     interval: 86400
   trackerslist:
     type: http
@@ -471,8 +471,8 @@ rule-providers:
   cn:
     type: http
     behavior: domain
-    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/cn.mrs
-    path: ./rule_set/other_ruleset/cn.mrs
+    url: https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/cn.mrs
+    path: ./rule_provider/cn_domain.mrs
     interval: 86400
 
 
