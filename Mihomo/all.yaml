@@ -5,9 +5,9 @@ mode: rule
 log-level: warning
 ipv6: false
 find-process-mode: strict
-external-controller: 0.0.0.0:9090
-external-ui: ./dashboard
-external-ui-url: 'https://testingcf.jsdelivr.net/gh/Zephyruso/zashboard@releases/latest/download/dist.zip'
+# external-controller: 0.0.0.0:9090
+# external-ui: ./dashboard
+# external-ui-url: 'https://testingcf.jsdelivr.net/gh/Zephyruso/zashboard@releases/latest/download/dist.zip'
 profile:
   store-selected: true
   store-fake-ip: true
