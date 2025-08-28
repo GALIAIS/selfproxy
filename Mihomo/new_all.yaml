@@ -115,32 +115,32 @@ RuleSet_ipcidr: &RuleSet_ipcidr {type: http, behavior: ipcidr, interval: 43200, 
 ### 规则集
 rule-providers:
   AI:
-    <<: *RuleSet_domain
+    <<: *RuleSet_classical
     url: https://raw.githubusercontent.com/liandu2024/clash/refs/heads/main/list/AI.list
     path: ./ruleset/ai.list
     interval: 86400
   GitHub:
-    <<: *RuleSet_domain
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.list
-    path: ./ruleset/github.list
+    <<: *RuleSet_classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.yaml
+    path: ./ruleset/GitHub.yaml
     interval: 86400
   TikTok:
-    <<: *RuleSet_domain
+    <<: *RuleSet_classical
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/TikTok/TikTok.list
     path: ./ruleset/tiktok.list
     interval: 86400
   Telegram:
-    <<: *RuleSet_domain
+    <<: *RuleSet_classical
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram.list
     path: ./ruleset/telegram.list
     interval: 86400
   Twitter:
-    <<: *RuleSet_domain
+    <<: *RuleSet_classical
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.list
     path: ./ruleset/twitter.list
     interval: 86400
   Facebook:
-    <<: *RuleSet_domain
+    <<: *RuleSet_classical
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Facebook/Facebook.list
     path: ./ruleset/facebook.list
     interval: 86400
