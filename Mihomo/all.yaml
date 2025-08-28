@@ -261,8 +261,8 @@ rule-providers:
   CN:
     type: http
     behavior: domain
-    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/cn.mrs
-    path: ./ruleset/cn.mrs
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/China/China_Classical.yaml
+    path: ./blackmatrix7/China_Classical.yaml
     interval: 86400
   Ad_Domain:
     type: http
