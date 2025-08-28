@@ -92,8 +92,8 @@ proxy-groups:
   - {name: 🕹️ Game (EA), type: select, proxies: [国外策略, 国内策略]}
   - {name: 🎞️ YouTube, type: select, proxies: [国外策略]}
   - {name: 🇬🇴 Google, type: select, proxies: [国外策略, 国内策略]}
-  - {name: 🌍 国外, type: select, proxies: [国外策略]}
   - {name: ➡️ 国内, type: select, proxies: [国内策略]}
+  - {name: 🌍 国外, type: select, proxies: [国外策略]}
   - {name: 🔒 隐私, type: select, proxies: [REJECT, 国内策略, 国外策略]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [国外策略, 国内策略, DIRECT]}
 
@@ -174,11 +174,6 @@ rule-providers:
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google.yaml
     path: ./ruleset/Google.yaml
     interval: 86400
-  Global:
-    <<: *RuleSet_domain
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global_Classical.yaml
-    path: ./ruleset/Global_Classical.yaml
-    interval: 86400
   CN_IP:
     <<: *RuleSet_ipcidr
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaIPs/ChinaIPs_Classical.yaml
@@ -188,6 +183,11 @@ rule-providers:
     <<: *RuleSet_domain
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoIP/ChinaMaxNoIP_Classical.yaml
     path: ./ruleset/ChinaMaxNoIP_Classical.yaml
+    interval: 86400
+  Global:
+    <<: *RuleSet_domain
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global_Classical.yaml
+    path: ./ruleset/Global_Classical.yaml
     interval: 86400
   Privacy:
     <<: *RuleSet_domain
@@ -213,9 +213,9 @@ rules:
   - RULE-SET,Steam,🎮 Steam
   - RULE-SET,Epic,🕹️ Game (Epic)
   - RULE-SET,EA,🕹️ Game (EA)
-  - RULE-SET,Global,🌍 国外
   - RULE-SET,CN,➡️ 国内
   - RULE-SET,CN_IP,➡️ 国内
   - GEOIP,CN_IP,➡️ 国内,no-resolve
+  - RULE-SET,Global,🌍 国外
   
   - MATCH,🐟 漏网之鱼
