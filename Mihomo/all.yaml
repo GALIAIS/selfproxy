@@ -71,46 +71,46 @@ Auto: &Auto {type: url-test, url: 'https://cp.cloudflare.com/generate_204', inte
 # 策略组
 proxy-groups:
   # 国内策略组
-  - {name: 国内策略, type: select, proxies: [国内自动选择, 国内手动选择, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/CN.png}
-  - {name: 国内自动选择, <<: *Auto, filter: *FilterCN, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/CN.png}
-  - {name: 国内手动选择, <<: *Select, filter: *FilterCN, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Static.png}
+  - {name: 国内策略, type: select, proxies: [国内自动选择, 国内手动选择, DIRECT]}
+  - {name: 国内自动选择, <<: *Auto, filter: *FilterCN}
+  - {name: 国内手动选择, <<: *Select, filter: *FilterCN}
   
   # 国外策略组
-  - {name: 国外策略, type: select, proxies: [国外自动选择, 国外手动选择, REJECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Global.png}
-  - {name: 国外自动选择, <<: *Auto, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Urltest.png}
-  - {name: 国外手动选择, <<: *Select, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Static.png}
+  - {name: 国外策略, type: select, proxies: [国外自动选择, 国外手动选择, REJECT]}
+  - {name: 国外自动选择, <<: *Auto, filter: *FilterAll}
+  - {name: 国外手动选择, <<: *Select, filter: *FilterAll}
 
   # 应用策略组
-  - {name: ✨ AI, type: select, proxies: [国外策略, 国内策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/OpenAI.png}
-  - {name: ✨ AI2, type: select, proxies: [国外策略, 国内策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/OpenAI.png}
-  - {name: 📘 GitHub, type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/GitHub.png}
-  - {name: 👯‍♂️ TikTok, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/TikTok.png}
-  - {name: 🙋 Telegram, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Telegram.png}
-  - {name: 🕊️ Twitter(X), type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Twitter.png}
-  - {name: 🗣️ Facebook, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Facebook.png}
-  - {name: 🌳 Amazon, type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Amazon.png}
-  - {name: 🍎 Apple, type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Apple.png}
-  - {name: Ⓜ️ Microsoft, type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Microsoft.png}
-  - {name: 🎮 Steam, type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Steam.png}
-  - {name: 🕹️ Game (Epic), type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Epic.png}
-  - {name: 🕹️ Game (EA), type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/EA.png}
-  - {name: 🕹️ Game (Blizzard), type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Blizzard.png}
-  - {name: 🕹️ Game (UBI), type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/UBI.png}
-  - {name: 🕹️ Game (Sony), type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Sony.png}
-  - {name: 🕹️ Game (Nintendo), type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Nintendo.png}
-  - {name: 🎞️ YouTube, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/YouTube.png}
-  - {name: 📺 Disney, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Disney.png}
-  - {name: 🎥 Netflix, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Netflix.png}
-  - {name: 🎬 HBO, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/HBO.png}
-  - {name: 🎵 Spotify, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Spotify.png}
-  - {name: 🇬🇴 Google, type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Google.png}
-  - {name: 🌍 国外, type: select, proxies: [国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Global.png}
-  - {name: ➡️ 国内, type: select, proxies: [国内策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/CN.png}
-  - {name: 🛑 广告, type: select, proxies: [REJECT, 国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/AD.png}
-  - {name: 🔒 隐私, type: select, proxies: [REJECT, 国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Privacy.png}
-  - {name: 🚫 恶意, type: select, proxies: [REJECT, 国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Malware.png}
-  - {name: 🎯 全球直连, type: select, proxies: [国内策略, 国外策略], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Direct.png}
-  - {name: 🐟 漏网之鱼, type: select, proxies: [国外策略, 国内策略, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Final.png}
+  - {name: ✨ AI, type: select, proxies: [国外策略, 国内策略]}
+  - {name: ✨ AI2, type: select, proxies: [国外策略, 国内策略]}
+  - {name: 📘 GitHub, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 👯‍♂️ TikTok, type: select, proxies: [国外策略]}
+  - {name: 🙋 Telegram, type: select, proxies: [国外策略]}
+  - {name: 🕊️ Twitter(X), type: select, proxies: [国外策略]}
+  - {name: 🗣️ Facebook, type: select, proxies: [国外策略]}
+  - {name: 🌳 Amazon, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🍎 Apple, type: select, proxies: [国内策略, 国外策略]}
+  - {name: Ⓜ️ Microsoft, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🎮 Steam, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🕹️ Game (Epic), type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🕹️ Game (EA), type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🕹️ Game (Blizzard), type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🕹️ Game (UBI), type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🕹️ Game (Sony), type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🕹️ Game (Nintendo), type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🎞️ YouTube, type: select, proxies: [国外策略]}
+  - {name: 📺 Disney, type: select, proxies: [国外策略]}
+  - {name: 🎥 Netflix, type: select, proxies: [国外策略]}
+  - {name: 🎬 HBO, type: select, proxies: [国外策略]}
+  - {name: 🎵 Spotify, type: select, proxies: [国外策略]}
+  - {name: 🇬🇴 Google, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🌍 国外, type: select, proxies: [国外策略]}
+  - {name: ➡️ 国内, type: select, proxies: [国内策略]}
+  - {name: 🛑 广告, type: select, proxies: [REJECT, 国内策略, 国外策略]}
+  - {name: 🔒 隐私, type: select, proxies: [REJECT, 国内策略, 国外策略]}
+  - {name: 🚫 恶意, type: select, proxies: [REJECT, 国内策略, 国外策略]}
+  - {name: 🎯 全球直连, type: select, proxies: [国内策略, 国外策略]}
+  - {name: 🐟 漏网之鱼, type: select, proxies: [国外策略, 国内策略, DIRECT]}
 
 ### 规则集
 rule-providers:
@@ -261,7 +261,7 @@ rule-providers:
   CN:
     type: http
     behavior: domain
-    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs
+    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/cn.mrs
     path: ./ruleset/cn.mrs
     interval: 86400
   Ad_Domain:
