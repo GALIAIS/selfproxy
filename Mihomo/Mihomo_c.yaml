@@ -1,0 +1,219 @@
+# ========================
+# 主要端口设置
+# ========================
+mixed-port: 7897
+allow-lan: true
+mode: rule
+log-level: warning
+ipv6: false
+profile:
+  store-selected: true
+  store-fake-ip: true
+find-process-mode: strict
+unified-delay: true
+tcp-concurrent: true
+global-client-fingerprint: chrome
+
+# ========================
+# DNS 设置
+# ========================
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  nameserver:
+    - https://223.5.5.5/dns-query
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  proxy-server-nameserver:
+    - https://1.1.1.1/dns-query
+    - https://dns.google/dns-query
+    - https://cloudflare-dns.com/dns-query
+  direct-nameserver:
+    - https://223.5.5.5/dns-query
+    - https://119.29.29.29/dns-query
+  fake-ip-filter:
+    # 局域网设备
+    - "*.lan"
+    - "*.local"
+    - "*.localdomain"
+    # 游戏相关（避免fake-ip影响游戏）
+    - "+.stun.*"
+    - "+.turn.*"
+    - "+.webrtc.*"
+  cache-size: 4096
+  dns-timeout: 3s
+  use-hosts: true
+  use-system-hosts: true
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  hosts:
+    "localhost": 127.0.0.1
+    "router.local": 192.168.1.1
+  nameserver-policy:
+    # 国内域名使用国内DNS
+    "+.cn": [https://223.5.5.5/dns-query]
+    "+.baidu.com": [https://223.5.5.5/dns-query]
+    "+.qq.com": [https://223.5.5.5/dns-query]
+    "+.alipay.com": [https://223.5.5.5/dns-query]
+    "+.weixin.com": [https://223.5.5.5/dns-query]
+    
+    # 国外域名使用国外DNS
+    "+.google.com": [https://1.1.1.1/dns-query]
+    "+.youtube.com": [https://1.1.1.1/dns-query]
+    "+.facebook.com": [https://1.1.1.1/dns-query]
+    "+.twitter.com": [https://1.1.1.1/dns-query]
+    "+.github.com": [https://1.1.1.1/dns-query]
+
+# ========================
+# TUN 模块
+# ========================
+tun:
+  enable: true
+  device: Mihomo
+  stack: mixed
+  dns-hijack: [any:53, tcp://any:53]
+  udp-timeout: 300
+  auto-route: true
+  auto-redirect: true
+  auto-detect-interface: true
+  strict-route: true
+  exclude-uid: []
+
+# ========================
+# 域名嗅探
+# ========================
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  skip-domain:
+    - dlg.io.mi.com
+    - "+.push.apple.com"
+
+# ========================
+# 节点筛选
+# ========================
+FilterAll: &FilterAll '^(?=.*(.))(?!.*((?i)群|邀请|返利|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author)\b|(\d{4}-\d{2}-\d{2}))).*$'
+FilterCN: &FilterCN '^(?=.*(中国|大陆|China|CN|cn|北京|上海|广州|深圳|杭州|成都|重庆|天津|武汉|西安|南京|苏州|青岛|大连|厦门|福州|长沙|郑州|济南|沈阳|长春|哈尔滨|石家庄|太原|兰州|银川|西宁|乌鲁木齐|拉萨|昆明|贵阳|南宁|海口|南昌|合肥|呼和浩特|河北|山西|辽宁|吉林|黑龙江|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|广西|海南|四川|贵州|云南|西藏|陕西|甘肃|青海|宁夏|新疆|内蒙古|移动|联通|电信|广电|BGP|家宽|自建))(?=.*(落地|隧道|中转))?.*$'
+FilterHK: &FilterHK '^(?=.*(香港|HK|Hongkong|HongKong|港|Asia\/Hong_Kong|Asia\/Hongkong|家宽|自建|中转|隧道)).*$'
+FilterTW: &FilterTW '^(?=.*(台湾|TW|Taiwan|台|Asia\/Taipei|家宽|自建|中转|隧道)).*$'
+FilterJP: &FilterJP '^(?=.*(日本|JP|Japan|东京|大阪|Asia\/Tokyo|Asia\/Osaka|家宽|自建|中转|隧道)).*$'
+FilterKR: &FilterKR '^(?=.*(韩国|KR|Korea|首尔|Asia\/Seoul|家宽|自建|中转|隧道)).*$'
+FilterSG: &FilterSG '^(?=.*(新加坡|SG|Singapore|狮城|Asia\/Singapore|家宽|自建|中转|隧道)).*$'
+FilterUS: &FilterUS '^(?=.*(美国|US|America|USA|United States|洛杉矶|纽约|芝加哥|西雅图|圣何塞|拉斯维加斯|凤凰城|达拉斯|迈阿密|华盛顿|阿什本|圣保罗|\bCA\b|\bNY\b|\bLA\b|North America|US\/|United-States|家宽|自建|中转|隧道)).*$'
+FilterCA: &FilterCA '^(?=.*(加拿大|CA|Canada|多伦多|温哥华|Montreal|North America|家宽|自建|中转|隧道)).*$'
+FilterGB: &FilterGB '^(?=.*(英国|GB|UK|England|London|Europe\/London|家宽|自建|中转|隧道)).*$'
+FilterDE: &FilterDE '^(?=.*(德国|DE|Germany|法兰克福|Berlin|Europe\/Frankfurt|家宽|自建|中转|隧道)).*$'
+FilterFR: &FilterFR '^(?=.*(法国|FR|France|巴黎|Europe\/Paris|家宽|自建|中转|隧道)).*$'
+FilterAU: &FilterAU '^(?=.*(澳大利亚|AU|Australia|悉尼|墨尔本|Asia\/Sydney|Oceania|家宽|自建|中转|隧道)).*$'
+FilterRU: &FilterRU '^(?=.*(俄罗斯|RU|Russia|莫斯科|Europe\/Moscow|家宽|自建|中转|隧道)).*$'
+FilterIN: &FilterIN '^(?=.*(印度|IN|India|孟买|新德里|Asia\/Mumbai|家宽|自建|中转|隧道)).*$'
+FilterVN: &FilterVN '^(?=.*(越南|VN|Vietnam|河内|胡志明|Asia\/Hanoi|家宽|自建|中转|隧道)).*$'
+FilterTH: &FilterTH '^(?=.*(泰国|TH|Thailand|曼谷|Asia\/Bangkok|家宽|自建|中转|隧道)).*$'
+FilterMY: &FilterMY '^(?=.*(马来西亚|MY|Malaysia|吉隆坡|Asia\/Kuala_Lumpur|家宽|自建|中转|隧道)).*$'
+FilterGlobal: &FilterGlobal '^(?=.*(Global|国际|海外|苏黎世|迪拜|墨西哥|圣保罗|Zurich|Dubai|Mexico|Sao Paulo|家宽|自建|中转|隧道)).*$'
+FilterMedia: &FilterMedia '^(?=.*(Netflix|Disney|HBO|流媒体|媒体|视频|影音|Prime|解锁)).*$'
+FilterGame: &FilterGame '^(?=.*(游戏|Game|Gaming|Steam|Xbox|PlayStation)).*$'
+FilterFast: &FilterFast '^(?=.*(高速|极速|快速|Premium|VIP|高级|Pro|Plus|优选|1G|5G|500m|5x)).*$'
+FilterEdu: &FilterEdu '^(?=.*(教育|Edu|University|校园|学术)).*$'
+
+# ========================
+# 策略组定义
+# ========================
+default: &default
+  type: select
+  proxies:
+    - DIRECT
+    - 国外策略
+    - 国内策略
+    - REJECT
+
+proxy-groups:
+  # 国内策略组
+  - {name: 国内策略, type: select, proxies: [国内自动选择, 国内手动选择, DIRECT]}
+  - {name: 国内自动选择, type: url-test, url: 'https://cp.cloudflare.com/generate_204', interval: 300, tolerance: 50, disable-udp: false, hidden: true, include-all: true, filter: *FilterCN}
+  - {name: 国内手动选择, type: select, url: 'https://cp.cloudflare.com/generate_204', disable-udp: false, hidden: false, include-all: true, filter: *FilterCN}
+  
+  # 国外策略组
+  - {name: 国外策略, type: select, proxies: [国外自动选择, 国外手动选择, REJECT]}
+  - {name: 国外自动选择, type: url-test, url: 'https://cp.cloudflare.com/generate_204', interval: 300, tolerance: 50, disable-udp: false, hidden: true, include-all: true, filter: *FilterAll}
+  - {name: 国外手动选择, type: select, url: 'https://cp.cloudflare.com/generate_204', disable-udp: false, hidden: false, include-all: true, filter: *FilterAll}
+
+  # 应用策略组
+  - {name: GitHub, <<: *default}
+  - {name: Telegram, <<: *default}
+  - {name: Twitter, <<: *default}
+  - {name: Facebook, <<: *default}
+  - {name: Amazon, <<: *default}
+  - {name: Apple, <<: *default}
+  - {name: Microsoft, <<: *default}
+  - {name: Steam, <<: *default}
+  - {name: "Game (Epic)", <<: *default}
+  - {name: "Game (EA)", <<: *default}
+  - {name: YouTube, <<: *default}
+  - {name: Google, <<: *default}
+  - {name: 国内, <<: *default}
+  - {name: 国外, <<: *default}
+  - {name: 隐私, <<: *default}
+  - {name: "漏网之鱼", <<: *default}
+
+# ========================
+# 规则引擎（rules）
+# ========================
+rules:
+  - RULE-SET,GitHub,GitHub
+  - RULE-SET,Telegram,Telegram
+  - RULE-SET,Twitter,Twitter
+  - RULE-SET,Facebook,Facebook
+  - RULE-SET,YouTube,YouTube
+  - RULE-SET,Amazon,Amazon
+  - RULE-SET,Apple,Apple
+  - RULE-SET,Microsoft,Microsoft
+  - RULE-SET,Google,Google
+  - OR,((RULE-SET,Steam),(RULE-SET,SteamCN)),Steam
+  - RULE-SET,Epic,"Game (Epic)"
+  - RULE-SET,EA,"Game (EA)"
+  - OR,((RULE-SET,ChinaMaxNoIP_Domain),(RULE-SET,ChinaMaxNoIP)),国内
+  - RULE-SET,Privacy,隐私
+  - RULE-SET,ChinaIPs_Classical_No_IPv6_No_Resolve,国内,no-resolve
+  - OR,((RULE-SET,Global),(RULE-SET,Global_Domain)),国外
+  - MATCH,"漏网之鱼"
+
+# ========================
+# 规则集提供者
+# ========================
+rule-anchor:
+  classical_yaml: &classical_yaml {type: http, behavior: classical, interval: 86400, format: yaml, proxy: 国外策略}
+  domain_yaml: &domain_yaml {type: http, behavior: domain, interval: 86400, format: yaml, proxy: 国外策略}
+  domain_text: &domain_text {type: http, behavior: domain, interval: 86400, format: text, proxy: 国外策略}
+
+rule-providers:
+  GitHub: {<<: *classical_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.yaml, path: ./blackmatrix7/GitHub.yaml}
+  Telegram: {<<: *classical_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Telegram/Telegram_No_Resolve.yaml, path: ./blackmatrix7/Telegram_No_Resolve.yaml}
+  Twitter: {<<: *classical_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.yaml, path: ./blackmatrix7/Twitter.yaml}
+  Facebook: {<<: *domain_text, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Facebook/Facebook.list, path: ./blackmatrix7/facebook.list}
+  Amazon: {<<: *domain_text, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Amazon/Amazon.list, path: ./blackmatrix7/amazon.list}
+  Apple: {<<: *domain_text, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple.list, path: ./blackmatrix7/apple.list}
+  Microsoft: {<<: *domain_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml, path: ./blackmatrix7/Microsoft.yaml}
+  Steam: {<<: *domain_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Steam/Steam.yaml, path: ./blackmatrix7/Steam.yaml}
+  SteamCN: {<<: *domain_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/SteamCN/SteamCN.yaml, path: ./blackmatrix7/SteamCN.yaml}
+  Epic: {<<: *domain_text, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Epic/Epic.list, path: ./blackmatrix7/epic.list}
+  EA: {<<: *domain_text, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/EA/EA.list, path: ./blackmatrix7/ea.list}
+  YouTube: {<<: *classical_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube.yaml, path: ./blackmatrix7/YouTube.yaml}
+  Google: {<<: *classical_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google_No_Resolve.yaml, path: ./blackmatrix7/Google_No_Resolve.yaml}
+  ChinaIPs_Classical_No_IPv6_No_Resolve: {<<: *classical_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaIPs/ChinaIPs_Classical_No_IPv6_No_Resolve.yaml, path: ./blackmatrix7/ChinaIPs_Classical_No_IPv6_No_Resolve.yaml}
+  ChinaMaxNoIP: {<<: *classical_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoIP/ChinaMaxNoIP.yaml, path: ./blackmatrix7/ChinaMaxNoIP.yaml}
+  ChinaMaxNoIP_Domain: {<<: *domain_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoIP/ChinaMaxNoIP_Domain.yaml, path: ./blackmatrix7/ChinaMaxNoIP_Domain.yaml}
+  Global: {<<: *classical_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global_No_Resolve.yaml, path: ./blackmatrix7/Global_No_Resolve.yaml}
+  Global_Domain: {<<: *domain_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global_Domain.yaml, path: ./blackmatrix7/Global_Domain.yaml}
+  Privacy: {<<: *domain_yaml, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Privacy/Privacy_Classical.yaml, path: ./blackmatrix7/Privacy_Classical.yaml}
