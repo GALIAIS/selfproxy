@@ -1,6 +1,6 @@
 proxy-providers:
   Airport1:
-    url: "机场订阅填到这里，两端引号不要去掉，不要填写到下方链接里去！！"
+    url: "http://192.168.1.185:3032/2cXaAxRGfddmGz2yx1wA/download/%E6%9C%A8%E7%93%9C%E4%BA%91"
     type: http
     interval: 86400
     health-check:
@@ -100,7 +100,6 @@ rules:
   - RULE-SET,Twitter,🕊️ Twitter(X)
   - RULE-SET,Facebook,🗣️ Facebook
   - RULE-SET,YouTube,🎞️ YouTube
-  - RULE-SET,Amazon,🌳 Amazon
   - RULE-SET,Apple,🍎 Apple
   - RULE-SET,Microsoft,Ⓜ️ Microsoft
   - RULE-SET,Google,🇬🇴 Google
@@ -109,7 +108,7 @@ rules:
   - RULE-SET,EA,🕹️ Game (EA)
   - OR,((RULE-SET,ChinaMaxNoIP_Domain),(RULE-SET,ChinaMaxNoIP)),➡️ 国内
   - RULE-SET,Privacy,🔒 隐私
-  - GEOIP,ChinaIPs_Classical_No_IPv6_No_Resolve,➡️ 国内,no-resolve
+  - RULE-SET,ChinaIPs_Classical_No_IPv6_No_Resolve,➡️ 国内,no-resolve
   - OR,((RULE-SET,Global),(RULE-SET,Global_Domain)),🌍 国外
   - MATCH,🐟 漏网之鱼
 
@@ -258,7 +257,6 @@ proxy-groups:
   - {name: 🙋 Telegram, type: select, proxies: [国外策略]}
   - {name: 🕊️ Twitter(X), type: select, proxies: [国外策略]}
   - {name: 🗣️ Facebook, type: select, proxies: [国外策略]}
-  - {name: 🌳 Amazon, type: select, proxies: [国外策略, 国内策略]}
   - {name: 🍎 Apple, type: select, proxies: [国外策略, 国内策略]}
   - {name: Ⓜ️ Microsoft, type: select, proxies: [国外策略, 国内策略]}
   - {name: 🎮 Steam, type: select, proxies: [国外策略, 国内策略]}
