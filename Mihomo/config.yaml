@@ -99,19 +99,22 @@ tun:
 
 # 规则匹配
 rules:
-  - DOMAIN-SUFFIX,google.com,🙋 Telegram  # 示例，实际应使用规则集
-  - DOMAIN-SUFFIX,youtube.com,🎞️ YouTube
-  - DOMAIN-SUFFIX,github.com,📘 GitHub
-  - DOMAIN-SUFFIX,facebook.com,🗣️ Facebook
-  - DOMAIN-SUFFIX,twitter.com,🕊️ Twitter(X)
-  - DOMAIN-SUFFIX,amazon.com,🌳 Amazon
-  - DOMAIN-SUFFIX,apple.com,🍎 Apple
-  - DOMAIN-SUFFIX,microsoft.com,Ⓜ️ Microsoft
-  - DOMAIN-SUFFIX,netflix.com,🎞️ YouTube  # 按需调整
-  - DOMAIN-SUFFIX,steam.com,🎮 Steam
-  - DOMAIN-SUFFIX,epic.com,🕹️ Game (Epic)
-  - DOMAIN-SUFFIX,ea.com,🕹️ Game (EA)
-  - GEOIP,CN,➡️ 国内
+  - RULE-SET,GitHub,📘 GitHub
+  - RULE-SET,Telegram,🙋 Telegram
+  - RULE-SET,Twitter,🕊️ Twitter(X)
+  - RULE-SET,Facebook,🗣️ Facebook
+  - RULE-SET,YouTube,🎞️ YouTube
+  - RULE-SET,Amazon,🌳 Amazon
+  - RULE-SET,Apple,🍎 Apple
+  - RULE-SET,Microsoft,Ⓜ️ Microsoft
+  - RULE-SET,Google,🇬🇴 Google
+  - OR,((RULE-SET,Steam),(RULE-SET,SteamCN)),🎮 Steam
+  - RULE-SET,Epic,🕹️ Game (Epic)
+  - RULE-SET,EA,🕹️ Game (EA)
+  - OR,((RULE-SET,ChinaMaxNoIP_Domain),(RULE-SET,ChinaMaxNoIP)),➡️ 国内
+  - RULE-SET,Privacy,🔒 隐私
+  - GEOIP,ChinaIPs_Classical_No_IPv6_No_Resolve,➡️ 国内,no-resolve
+  - OR,((RULE-SET,Global),(RULE-SET,Global_Domain)),🌍 国外
   - MATCH,🐟 漏网之鱼
 
 # 规则集定义
@@ -245,14 +248,14 @@ rule-providers:
 
 proxy-groups:
   # 国内策略组
-  - {name: 国内策略, type: select, proxies: [国内自动选择, 国内手动选择, 直连]}
-  - {name: 国内自动选择, type: url-test, url: 'https://cp.cloudflare.com/generate_204', interval: 300, tolerance: 50, filter: '^(?=.*中国|大陆|CN)(?=.*落地).*$', include-all: true}
-  - {name: 国内手动选择, type: select, filter: '^(?=.*中国|大陆|CN)(?=.*落地).*$', include-all: true}
+  - {name: 国内策略, type: select, proxies: [国内自动选择, 国内手动选择, DIRECT]}
+  - {name: 国内自动选择, type: url-test, url: 'https://cp.cloudflare.com/generate_204', interval: 300, tolerance: 50, filter: '^(?=.*(中国|大陆|China|CN|cn|北京|上海|广州|深圳|杭州|成都|重庆|天津|武汉|西安|南京|苏州|青岛|大连|厦门|福州|长沙|郑州|济南|沈阳|长春|哈尔滨|石家庄|太原|兰州|银川|西宁|乌鲁木齐|拉萨|昆明|贵阳|南宁|海口|南昌|合肥|呼和浩特|河北|山西|辽宁|吉林|黑龙江|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|广西|海南|四川|贵州|云南|西藏|陕西|甘肃|青海|宁夏|新疆|内蒙古|移动|联通|电信|广电|BGP|家宽|自建))(?=.*(落地|隧道|中转))?.*$', include-all: true}
+  - {name: 国内手动选择, type: select, filter: '^(?=.*(中国|大陆|China|CN|cn|北京|上海|广州|深圳|杭州|成都|重庆|天津|武汉|西安|南京|苏州|青岛|大连|厦门|福州|长沙|郑州|济南|沈阳|长春|哈尔滨|石家庄|太原|兰州|银川|西宁|乌鲁木齐|拉萨|昆明|贵阳|南宁|海口|南昌|合肥|呼和浩特|河北|山西|辽宁|吉林|黑龙江|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|广西|海南|四川|贵州|云南|西藏|陕西|甘肃|青海|宁夏|新疆|内蒙古|移动|联通|电信|广电|BGP|家宽|自建))(?=.*(落地|隧道|中转))?.*$', include-all: true}
 
   # 国外策略组
-  - {name: 国外策略, type: select, proxies: [国外自动选择, 国外手动选择, 直连]}
-  - {name: 国外自动选择, type: url-test, url: 'https://cp.cloudflare.com/generate_204', interval: 300, tolerance: 50, filter: '.*', include-all: true}
-  - {name: 国外手动选择, type: select, filter: '.*', include-all: true}
+  - {name: 国外策略, type: select, proxies: [国外自动选择, 国外手动选择, DIRECT]}
+  - {name: 国外自动选择, type: url-test, url: 'https://cp.cloudflare.com/generate_204', interval: 300, tolerance: 50, filter: '^(?=.*(.))(?!.*((?i)群|邀请|返利|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author)\b|(\d{4}-\d{2}-\d{2}))).*$', include-all: true}
+  - {name: 国外手动选择, type: select, filter: '^(?=.*(.))(?!.*((?i)群|邀请|返利|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author)\b|(\d{4}-\d{2}-\d{2}))).*$', include-all: true}
 
   # 应用策略组
   - {name: 📘 GitHub, type: select, proxies: [国外策略, 国内策略]}
