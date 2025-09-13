@@ -117,126 +117,126 @@ rules:
 # 规则集定义
 rule-providers:
   GitHub:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   Telegram:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram_No_Resolve.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram_No_Resolve.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   Twitter:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   Facebook:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Facebook/Facebook.list
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Facebook/Facebook.list
     type: http
     interval: 86400
     behavior: domain
     format: text
     proxy: 国外策略
   Apple:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple.list
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple.list
     type: http
     interval: 86400
     behavior: domain
     format: text
     proxy: 国外策略
   Microsoft:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   YouTube:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   Google:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google_No_Resolve.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google_No_Resolve.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   Steam:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Steam/Steam.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Steam/Steam.yaml
     type: http
     interval: 86400
     behavior: domain
     format: text
     proxy: 国外策略
   SteamCN:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/SteamCN/SteamCN.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/SteamCN/SteamCN.yaml
     type: http
     interval: 86400
     behavior: domain
     format: text
     proxy: 国外策略
   Epic:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Epic/Epic.list
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Epic/Epic.list
     type: http
     interval: 86400
     behavior: domain
     format: text
     proxy: 国外策略
   EA:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/EA/EA.list
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/EA/EA.list
     type: http
     interval: 86400
     behavior: domain
     format: text
     proxy: 国外策略
   ChinaIPs_Classical_No_IPv6_No_Resolve:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaIPs/ChinaIPs_Classical_No_IPv6_No_Resolve.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaIPs/ChinaIPs_Classical_No_IPv6_No_Resolve.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   ChinaMaxNoIP:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoIP/ChinaMaxNoIP.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoIP/ChinaMaxNoIP.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   ChinaMaxNoIP_Domain:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoIP/ChinaMaxNoIP_Domain.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMaxNoIP/ChinaMaxNoIP_Domain.yaml
     type: http
     interval: 86400
     behavior: domain
     format: text
     proxy: 国外策略
   Global:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global_No_Resolve.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global_No_Resolve.yaml
     type: http
     interval: 86400
     behavior: classical
     format: yaml
     proxy: 国外策略
   Global_Domain:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global_Domain.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Global/Global_Domain.yaml
     type: http
     interval: 86400
     behavior: domain
     format: text
     proxy: 国外策略
   Privacy:
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Privacy/Privacy_Classical.yaml
+    url: https://edgeone.gh-proxy.com/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Privacy/Privacy_Classical.yaml
     type: http
     interval: 86400
     behavior: classical
