@@ -170,7 +170,7 @@ proxy-groups:
   - {name: ➡️ 国内, type: select, proxies: [国内策略]}
   - {name: 🌍 国外, type: select, proxies: [国外策略]}
   - {name: 🔒 隐私, type: select, proxies: [REJECT, 国内策略, 国外策略]}
-  - {name: 🐟 漏网之鱼, type: select, proxies: [国外策略, 国内策略, DIRECT]}
+  - {name: 🐟 漏网之鱼, type: select, proxies: [国外策略, 国内策略, 独立策略, DIRECT]}
 
 # 规则集定义
 rule-anchor:
