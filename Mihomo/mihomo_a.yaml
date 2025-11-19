@@ -151,6 +151,9 @@ proxy-groups:
   - {name: 国外自动选择, <<: *Auto, filter: *FilterAll}
   - {name: 国外手动选择, <<: *Select, filter: *FilterAll}
 
+  # 独立策略
+  - {name: 独立策略, type: select, proxies: [国内自动选择, 国外自动选择, DIRECT, REJECT]}
+
   # 应用策略组
   - {name: 📘 GitHub, type: select, proxies: [国外策略, 国内策略]}
   - {name: 🙋 Telegram, type: select, proxies: [国外策略]}
