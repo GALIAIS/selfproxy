@@ -142,12 +142,12 @@ Auto: &Auto {type: url-test, url: 'https://cp.cloudflare.com/generate_204', inte
 # 策略组
 proxy-groups:
   # 国内策略组
-  - {name: 国内策略, type: select, proxies: [国内自动选择, 国内手动选择, DIRECT]}
+  - {name: 国内策略, type: select, proxies: [国内自动选择, 国内手动选择, DIRECT, REJECT]}
   - {name: 国内自动选择, <<: *Auto, filter: *FilterCN}
   - {name: 国内手动选择, <<: *Select, filter: *FilterCN}
   
   # 国外策略组
-  - {name: 国外策略, type: select, proxies: [国外自动选择, 国外手动选择, REJECT]}
+  - {name: 国外策略, type: select, proxies: [国外自动选择, 国外手动选择, REJECT, DIRECT]}
   - {name: 国外自动选择, <<: *Auto, filter: *FilterAll}
   - {name: 国外手动选择, <<: *Select, filter: *FilterAll}
 
