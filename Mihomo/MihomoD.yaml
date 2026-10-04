@@ -1,4 +1,4 @@
-### MihomoC - 2026-10-04 主动测速 / DNS 稳定性修订版
+### MihomoD - 2026-10-04 主动测速 / 严格节点分组版
 ### 目标：Android / Windows / macOS / Linux 共用核心配置
 ### 规则架构：MetaCubeX MRS 承担大规模 domain/ipcidr；Classical 保留隐私规则
 ### 本文件与原文件一样是核心模板，不含真实节点；请由客户端合并订阅，或填写下方 provider 示例。
@@ -184,35 +184,38 @@ NodeParam: &NodeParam
 
 ### 节点筛选
 # 国内只匹配明确的国家标签；CN2、BGP、中转、自建不代表出口在中国大陆。
-# 名称仍可能缺标签或标错，“全部自动选择”提供不依赖国家标签的兜底。
-FilterInfo: &FilterInfo '(?i)剩余|流量|到期|过期|官网|客服|订阅|返利|邀请|套餐|重置|公告|通知|群组|工单'
-FilterAll: &FilterAll '^(?!.*(?i:剩余|流量|到期|过期|官网|客服|订阅|返利|邀请|套餐|重置|公告|通知|群组|工单)).*$'
-FilterGlobal: &FilterGlobal '^(?!.*(?:中国|大陆|🇨🇳|(?i:\bCN\b|\bChina\b|\bMainland\b)))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|倍率)).*$'
-FilterCN: &FilterCN '^(?=.*(?:中国|大陆|🇨🇳|(?i:\bCN\b|\bChina\b|\bMainland\b)))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|倍率)).*$'
-FilterGlobal_Multiplier: &FilterGlobal_Multiplier '^(?!.*(?:中国|大陆|🇨🇳|(?i:\bCN\b|\bChina\b|\bMainland\b)))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|倍率)).*$'
-FilterCN_Multiplier: &FilterCN_Multiplier '^(?=.*(?:中国|大陆|🇨🇳|(?i:\bCN\b|\bChina\b|\bMainland\b)))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|倍率)).*$'
+# CN 后接汉字时不存在 Unicode 单词边界；使用 ASCII 标签边界，同时避免将 CN2 当作国内标签。
+# 名称仍可能缺标签或标错；混合选择只在“全部”分组和独立策略中显式提供。
+FilterInfo: &FilterInfo '(?i)剩余|流量|到期|过期|官网|客服|订阅|返利|邀请|套餐|重置|公告|通知|群组|电报群|工单|下次|频道|^[-=]{2,}'
+# 所有节点组统一通过 exclude-filter 排除提示条目，避免两份排除规则不同步。
+FilterAll: &FilterAll '.*'
+FilterGlobal: &FilterGlobal '^(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+FilterCN: &FilterCN '^(?=.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+FilterGlobal_Multiplier: &FilterGlobal_Multiplier '^(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+FilterCN_Multiplier: &FilterCN_Multiplier '^(?=.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
 
-Select: &Select {type: select, disable-udp: false, hidden: false, include-all: true, exclude-filter: *FilterInfo}
+Select: &Select {type: select, disable-udp: false, hidden: false, include-all: true, exclude-filter: *FilterInfo, empty-fallback: REJECT}
 # IP 测试目标避免“测速需要 DNS，而 DNS 又需要测速选出节点”的循环。
 # max-failed-times 是触发强制健康检查的连接失败计数，不是测速连续失败重试次数。
-Auto: &Auto {type: url-test, url: 'https://1.1.1.1/cdn-cgi/trace', interval: 30, tolerance: 100, timeout: 10000, max-failed-times: 3, expected-status: '200-299', disable-udp: false, lazy: false, hidden: true, include-all: true, exclude-filter: *FilterInfo}
+Auto: &Auto {type: url-test, url: 'https://1.1.1.1/cdn-cgi/trace', interval: 30, tolerance: 100, timeout: 10000, max-failed-times: 3, expected-status: '200-299', disable-udp: false, lazy: false, hidden: true, include-all: true, exclude-filter: *FilterInfo, empty-fallback: REJECT}
 DomesticAuto: &DomesticAuto {<<: *Auto, url: 'https://www.baidu.com', expected-status: '200-399'}
+Fallback: &Fallback {type: fallback, url: 'https://1.1.1.1/cdn-cgi/trace', interval: 30, timeout: 10000, lazy: false, expected-status: '200-299', max-failed-times: 3, empty-fallback: REJECT}
 
 ### 策略组
 proxy-groups:
-  # DNS 始终从所有可用节点自动选择；此组可能使用倍率节点以保证解析可用。
-  - {name: DNS自动选择, <<: *Auto, filter: *FilterAll}
+  # DNS 优先使用国外自动组，必要时显式使用混合组；不重复对所有节点建立同一测速任务。
+  - {name: DNS自动选择, <<: *Fallback, proxies: [国外自动兜底, 全部自动选择]}
   - {name: 全部自动选择, <<: *Auto, filter: *FilterAll, hidden: false}
   - {name: 全部手动选择, <<: *Select}
-  # 普通国外组为空、没有普通倍率节点或国家标签不准确时自动兜底。
-  # 最后一级全部组可能包含倍率或国内节点，以可达测试目标为准。
-  - {name: 国外自动兜底, type: fallback, proxies: [国外自动选择, 国外倍率自动, 全部自动选择], url: 'https://1.1.1.1/cdn-cgi/trace', interval: 30, timeout: 10000, lazy: false, expected-status: '200-299', max-failed-times: 3}
+  # 国外兜底仅在普通与倍率国外组之间切换，不经混合组引入国内节点。
+  - {name: 国外自动兜底, <<: *Fallback, proxies: [国外自动选择, 国外倍率自动]}
   # === 基础节点分组 ===
   - {name: 国内策略, type: select, proxies: [DIRECT, 国内自动选择, 国内手动选择, 国内倍率自动, 国内倍率手动]}
   - {name: 国内自动选择, <<: *DomesticAuto, filter: *FilterCN}
   - {name: 国内手动选择, <<: *Select, filter: *FilterCN}
 
-  - {name: 国外策略, type: select, proxies: [国外自动兜底, 国外自动选择, 国外手动选择, 国外倍率自动, 国外倍率手动, 全部手动选择, DIRECT]}
+  # 手动指定的国外分组失联后也能恢复自动兜底，不隐式转为直连或国内节点。
+  - {name: 国外策略, <<: *Fallback, proxies: [国外自动兜底, 国外自动选择, 国外手动选择, 国外倍率自动, 国外倍率手动]}
   - {name: 国外自动选择, <<: *Auto, filter: *FilterGlobal}
   - {name: 国外手动选择, <<: *Select, filter: *FilterGlobal}
 
@@ -223,7 +226,7 @@ proxy-groups:
   - {name: 国外倍率手动, <<: *Select, filter: *FilterGlobal_Multiplier}
 
   # 独立策略
-  - {name: 独立策略, type: select, proxies: [国内自动选择, 国内手动选择, 国外自动选择, 国外手动选择, 国内倍率自动, 国内倍率手动, 国外倍率自动, 国外倍率手动, DIRECT]}
+  - {name: 独立策略, type: select, proxies: [国内自动选择, 国内手动选择, 国外自动选择, 国外手动选择, 国内倍率自动, 国内倍率手动, 国外倍率自动, 国外倍率手动, 全部自动选择, 全部手动选择, DIRECT]}
 
   # === 应用策略组 ===
   # 隐私组默认直连；需要主动阻断时再选择 REJECT，避免宽泛隐私规则误伤。
