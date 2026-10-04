@@ -186,6 +186,7 @@ NodeParam: &NodeParam
 # 国内只匹配明确的国家标签；CN2、BGP、中转、自建不代表出口在中国大陆。
 # 名称仍可能缺标签或标错，“全部自动选择”提供不依赖国家标签的兜底。
 FilterInfo: &FilterInfo '(?i)剩余|流量|到期|过期|官网|客服|订阅|返利|邀请|套餐|重置|公告|通知|群组|工单'
+FilterAll: &FilterAll '^(?!.*(?i:剩余|流量|到期|过期|官网|客服|订阅|返利|邀请|套餐|重置|公告|通知|群组|工单)).*$'
 FilterGlobal: &FilterGlobal '^(?!.*(?:中国|大陆|🇨🇳|(?i:\bCN\b|\bChina\b|\bMainland\b)))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|倍率)).*$'
 FilterCN: &FilterCN '^(?=.*(?:中国|大陆|🇨🇳|(?i:\bCN\b|\bChina\b|\bMainland\b)))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|倍率)).*$'
 FilterGlobal_Multiplier: &FilterGlobal_Multiplier '^(?!.*(?:中国|大陆|🇨🇳|(?i:\bCN\b|\bChina\b|\bMainland\b)))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|倍率)).*$'
