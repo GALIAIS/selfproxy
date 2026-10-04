@@ -185,7 +185,7 @@ NodeParam: &NodeParam
 ### 节点筛选
 # 国内只匹配明确的国家标签；CN2、BGP、中转、自建不代表出口在中国大陆。
 # CN 后接汉字时不存在 Unicode 单词边界；使用 ASCII 标签边界，同时避免将 CN2 当作国内标签。
-# 名称仍可能缺标签或标错；混合选择只在“全部”分组和独立策略中显式提供。
+# 名称仍可能缺标签或标错；需要混合选择时显式使用“全部”分组。
 FilterInfo: &FilterInfo '(?i)剩余|流量|到期|过期|官网|客服|订阅|返利|邀请|套餐|重置|公告|通知|群组|电报群|工单|下次|频道|^[-=]{2,}'
 # 所有节点组统一通过 exclude-filter 排除提示条目，避免两份排除规则不同步。
 FilterAll: &FilterAll '.*'
@@ -203,8 +203,8 @@ Fallback: &Fallback {type: fallback, url: 'https://1.1.1.1/cdn-cgi/trace', inter
 
 ### 策略组
 proxy-groups:
-  # DNS 优先使用国外自动组，必要时显式使用混合组；不重复对所有节点建立同一测速任务。
-  - {name: DNS自动选择, <<: *Fallback, proxies: [国外自动兜底, 全部自动选择]}
+  # DNS 始终从所有可用节点自动选择；此组可能使用倍率节点以保证解析可用。
+  - {name: DNS自动选择, <<: *Auto, filter: *FilterAll}
   - {name: 全部自动选择, <<: *Auto, filter: *FilterAll, hidden: false}
   - {name: 全部手动选择, <<: *Select}
   # 国外兜底仅在普通与倍率国外组之间切换，不经混合组引入国内节点。
@@ -214,8 +214,7 @@ proxy-groups:
   - {name: 国内自动选择, <<: *DomesticAuto, filter: *FilterCN}
   - {name: 国内手动选择, <<: *Select, filter: *FilterCN}
 
-  # 手动指定的国外分组失联后也能恢复自动兜底，不隐式转为直连或国内节点。
-  - {name: 国外策略, <<: *Fallback, proxies: [国外自动兜底, 国外自动选择, 国外手动选择, 国外倍率自动, 国外倍率手动]}
+  - {name: 国外策略, type: select, proxies: [国外自动兜底, 国外自动选择, 国外手动选择, 国外倍率自动, 国外倍率手动, 全部手动选择, DIRECT]}
   - {name: 国外自动选择, <<: *Auto, filter: *FilterGlobal}
   - {name: 国外手动选择, <<: *Select, filter: *FilterGlobal}
 
@@ -226,7 +225,7 @@ proxy-groups:
   - {name: 国外倍率手动, <<: *Select, filter: *FilterGlobal_Multiplier}
 
   # 独立策略
-  - {name: 独立策略, type: select, proxies: [国内自动选择, 国内手动选择, 国外自动选择, 国外手动选择, 国内倍率自动, 国内倍率手动, 国外倍率自动, 国外倍率手动, 全部自动选择, 全部手动选择, DIRECT]}
+  - {name: 独立策略, type: select, proxies: [国内自动选择, 国内手动选择, 国外自动选择, 国外手动选择, 国内倍率自动, 国内倍率手动, 国外倍率自动, 国外倍率手动, DIRECT]}
 
   # === 应用策略组 ===
   # 隐私组默认直连；需要主动阻断时再选择 REJECT，避免宽泛隐私规则误伤。
