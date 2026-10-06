@@ -2,14 +2,14 @@
 ### 目标：Android / Windows / macOS / Linux 共用核心配置
 ### 规则架构：MetaCubeX MRS 承担大规模 domain/ipcidr；Classical 保留隐私规则
 ### 本文件与原文件一样是核心模板，不含真实节点；请由客户端合并订阅，或填写下方 provider 示例。
-### 保留旧策略选择时：国内策略/隐私切 DIRECT，国外策略切“国外自动兜底”。
+### DNS 由客户端管理；本模板不定义 DNS 上游、解析模式或缓存策略。
 ### IPv4 基线：若节点仅支持 IPv6，须结合实际 IPv6/TUN 网络单独调整，不能通用地强开。
-### proxy-providers 的定时检测由 provider 自身管理：合并后必须同时检查 health-check.lazy=false。
+### proxy-providers 的健康检查需自行配置；默认按需检测，地区自动组负责主动检测。
 ### 单一测试目标的可达性不等于所有网站可达；配置无法消除上游故障、网络限制或应用自身故障。
 
 ### 全局配置
 mixed-port: 7897
-allow-lan: true
+allow-lan: false
 mode: rule
 log-level: warning
 ipv6: false
@@ -17,7 +17,6 @@ find-process-mode: strict  # 桌面端保留进程匹配；路由器场景才建
 
 profile:
   store-selected: true
-  store-fake-ip: true
 
 unified-delay: true
 tcp-concurrent: true
@@ -27,116 +26,23 @@ hosts:
   'localhost': 127.0.0.1
   # 不预设 router.local 的地址；需要静态映射时填写自己路由器的真实 LAN 地址。
 
-### DNS 配置
-dns:
-  enable: true
-  listen: 127.0.0.1:1053
-  ipv6: false
-  prefer-h3: false
-  cache-algorithm: arc
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
-  fake-ip-filter-mode: blacklist
-
-  use-hosts: true
-  use-system-hosts: true
-  respect-rules: false
-
-  # 国内加密 DNS 显式直连，节点域名解析不依赖任何代理组。
-  # bootstrap 只用于解析 DoH 服务器域名；保留两个 IP 引导源。
-  default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-
-  proxy-server-nameserver: &DomesticDNS
-    - 'https://223.5.5.5/dns-query#DIRECT'
-    - 'https://doh.pub/dns-query#DIRECT'
-
-  # 遵循域名策略，使私有域名走本地解析、显式海外域名走可信解析。
-  direct-nameserver: *DomesticDNS
-  direct-nameserver-follow-policy: true
-
-  # 独立自动组不受“国外策略”手动选择影响；IP 形式的 DoH 无需再解析服务器域名。
-  nameserver:
-    - 'https://1.1.1.1/dns-query#DNS自动选择'
-    - 'https://8.8.8.8/dns-query#DNS自动选择'
-
-  nameserver-policy:
-    # 私有域名不能交给公网 DNS。系统 DNS 必须是实际 LAN DNS，不能指回本配置监听端口。
-    # 若客户端把 system 指向 Mihomo 自身，将此处 system 改为真实 LAN DNS 地址。
-    'rule-set:private_domain': system
-    '+.lan': system
-    '+.local': system
-    '+.localdomain': system
-    '+.internal': system
-    '+.home.arpa': system
-    # 更新规则所需域名不依赖尚未加载的 cn_domain 集合或国外代理组。
-    '+.jsdelivr.net': *DomesticDNS
-    '+.doh.pub': *DomesticDNS
-    '+.alidns.com': *DomesticDNS
-    '+.baidu.com': *DomesticDNS
-    'dns.msftncsi.com': *DomesticDNS
-    'www.msftncsi.com': *DomesticDNS
-    'www.msftconnecttest.com': *DomesticDNS
-    'rule-set:cn_domain': *DomesticDNS
-    '+.cn': *DomesticDNS
-
-  # 不分配 Fake-IP 的域名。
-  fake-ip-filter:
-    # MRS 私有域名集合 + 本地通配兜底
-    - 'rule-set:private_domain'
-    # 局域网 / 本地域名
-    - '+.lan'
-    - '+.local'
-    - '+.localdomain'
-    - '+.internal'
-    - '+.home.arpa'
-    - 'localhost'
-
-    # STUN / TURN / WebRTC
-    - 'stun.*.*'
-    - 'stun.*.*.*'
-    - '+.stun.*.*'
-    - '+.stun.*.*.*'
-    - 'turn.*.*'
-    - 'turn.*.*.*'
-    - '+.turn.*.*'
-    - '+.turn.*.*.*'
-    - 'webrtc.*.*'
-    - 'webrtc.*.*.*'
-    - '+.webrtc.*.*'
-    - '+.webrtc.*.*.*'
-
-    # 联网检查 / 游戏主机 / 局域网发现需要真实地址
-    - 'dns.msftncsi.com'
-    - 'www.msftconnecttest.com'
-    - 'www.msftncsi.com'
-    - '*.srv.nintendo.net'
-    - '*.stun.playstation.net'
-    - 'xbox.*.microsoft.com'
-    - '*.xboxlive.com'
-    - 'lancache.steamcontent.com'
-    - '+.market.xiaomi.com'
-
-    # 时间同步
-    - 'time.*.com'
-    - 'ntp.*.com'
-    - '+.pool.ntp.org'
-    - '+.ntp.org.cn'
-
 ### 域名嗅探
 sniffer:
   enable: true
-  # 嗅探用于分流，不强制将既定连接目标重写为嗅探域名。
-  override-destination: false
+  # 使用可识别的域名连接目标，避免异常解析地址继续作为代理目的地。
+  override-destination: true
+  parse-pure-ip: true
+  force-dns-mapping: true
   sniff:
     HTTP:
       ports: [80, 8080-8880]
-      override-destination: false
+      override-destination: true
     TLS:
       ports: [443, 8443]
+      override-destination: true
     QUIC:
       ports: [443, 8443]
+      override-destination: true
   skip-domain:
     - dlg.io.mi.com
     - '+.push.apple.com'
@@ -168,11 +74,11 @@ NodeParam: &NodeParam
   interval: 86400
   health-check:
     enable: true
-    url: 'https://1.1.1.1/cdn-cgi/trace'
-    interval: 30
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
     timeout: 10000
-    lazy: false
-    expected-status: '200-299'
+    lazy: true
+    expected-status: '204'
 
 # 原文件没有订阅地址；按实际情况启用，勿把占位链接当作有效订阅。
 # proxy-providers:
@@ -185,27 +91,25 @@ NodeParam: &NodeParam
 ### 节点筛选
 # 国内只匹配明确的国家标签；CN2、BGP、中转、自建不代表出口在中国大陆。
 # CN 后接汉字时不存在 Unicode 单词边界；使用 ASCII 标签边界，同时避免将 CN2 当作国内标签。
-# 名称仍可能缺标签或标错；需要混合选择时显式使用“全部”分组。
-FilterInfo: &FilterInfo '(?i)剩余|流量|到期|过期|官网|客服|订阅|返利|邀请|套餐|重置|公告|通知|群组|电报群|工单|下次|频道|^[-=]{2,}'
+# 国外须有明确地区标签；缺标签节点仅出现在“全部”组。
+FilterInfo: &FilterInfo '(?i)剩余流量|距离下次重置|套餐到期|过期|https?://|(?:官网|客服|订阅地址|返利|邀请|套餐|重置|公告|通知|群组|电报群|工单|频道)\s*[:：@]|^建议\s*[:：]|^没网更新订阅|^[-=]{2,}'
 # 所有节点组统一通过 exclude-filter 排除提示条目，避免两份排除规则不同步。
 FilterAll: &FilterAll '.*'
-FilterGlobal: &FilterGlobal '^(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+FilterGlobal: &FilterGlobal '^(?=.*(?:香港|澳门|台湾|日本|韩国|新加坡|美国|英国|德国|法国|荷兰|印度|罗马|悉尼|澳大利亚|澳洲|加拿大|俄罗斯|土耳其|巴西|阿根廷|南非|泰国|越南|菲律宾|马来西亚|印尼|印度尼西亚|瑞士|瑞典|挪威|芬兰|丹麦|意大利|西班牙|葡萄牙|波兰|乌克兰|以色列|阿联酋|迪拜|新西兰|墨西哥|爱尔兰|奥地利|比利时|捷克|匈牙利|罗马尼亚|希腊|冰岛|卢森堡|柬埔寨|缅甸|巴基斯坦|孟加拉|尼泊尔|斯里兰卡|沙特|埃及|尼日利亚|肯尼亚|智利|秘鲁|哥伦比亚|🇭🇰|🇲🇴|🇹🇼|🇯🇵|🇰🇷|🇸🇬|🇺🇸|🇬🇧|🇩🇪|🇫🇷|🇳🇱|🇨🇦|🇦🇺|🇮🇳|(?i:(?<![A-Za-z0-9])(?:HK|Hong[ -]?Kong|MO|Macau|Macao|TW|Taiwan|JP|Japan|KR|Korea|SG|Singapore|US|USA|United[ -]?States|UK|GB|Britain|United[ -]?Kingdom|DE|Germany|FR|France|NL|Netherlands|IN|India|AU|Australia|CA|Canada|RU|Russia|TR|Turkey|BR|Brazil|TH|Thailand|VN|Vietnam|PH|Philippines|MY|Malaysia|ID|Indonesia|CH|Switzerland|SE|Sweden|NO|Norway|FI|Finland|DK|Denmark|IT|Italy|ES|Spain|PT|Portugal|PL|Poland|NZ|New[ -]?Zealand|AE|UAE|Dubai|IE|Ireland|AT|Austria|BE|Belgium|CZ|Czech)(?![A-Za-z0-9]))))(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
 FilterCN: &FilterCN '^(?=.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
-FilterGlobal_Multiplier: &FilterGlobal_Multiplier '^(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+FilterGlobal_Multiplier: &FilterGlobal_Multiplier '^(?=.*(?:香港|澳门|台湾|日本|韩国|新加坡|美国|英国|德国|法国|荷兰|印度|罗马|悉尼|澳大利亚|澳洲|加拿大|俄罗斯|土耳其|巴西|阿根廷|南非|泰国|越南|菲律宾|马来西亚|印尼|印度尼西亚|瑞士|瑞典|挪威|芬兰|丹麦|意大利|西班牙|葡萄牙|波兰|乌克兰|以色列|阿联酋|迪拜|新西兰|墨西哥|爱尔兰|奥地利|比利时|捷克|匈牙利|罗马尼亚|希腊|冰岛|卢森堡|柬埔寨|缅甸|巴基斯坦|孟加拉|尼泊尔|斯里兰卡|沙特|埃及|尼日利亚|肯尼亚|智利|秘鲁|哥伦比亚|🇭🇰|🇲🇴|🇹🇼|🇯🇵|🇰🇷|🇸🇬|🇺🇸|🇬🇧|🇩🇪|🇫🇷|🇳🇱|🇨🇦|🇦🇺|🇮🇳|(?i:(?<![A-Za-z0-9])(?:HK|Hong[ -]?Kong|MO|Macau|Macao|TW|Taiwan|JP|Japan|KR|Korea|SG|Singapore|US|USA|United[ -]?States|UK|GB|Britain|United[ -]?Kingdom|DE|Germany|FR|France|NL|Netherlands|IN|India|AU|Australia|CA|Canada|RU|Russia|TR|Turkey|BR|Brazil|TH|Thailand|VN|Vietnam|PH|Philippines|MY|Malaysia|ID|Indonesia|CH|Switzerland|SE|Sweden|NO|Norway|FI|Finland|DK|Denmark|IT|Italy|ES|Spain|PT|Portugal|PL|Poland|NZ|New[ -]?Zealand|AE|UAE|Dubai|IE|Ireland|AT|Austria|BE|Belgium|CZ|Czech)(?![A-Za-z0-9]))))(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
 FilterCN_Multiplier: &FilterCN_Multiplier '^(?=.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
 
 Select: &Select {type: select, disable-udp: false, hidden: false, include-all: true, exclude-filter: *FilterInfo, empty-fallback: REJECT}
-# IP 测试目标避免“测速需要 DNS，而 DNS 又需要测速选出节点”的循环。
+# HTTP 204 检测不依赖内核的 HTTPS 测速行为；DNS 由客户端独立提供。
 # max-failed-times 是触发强制健康检查的连接失败计数，不是测速连续失败重试次数。
-Auto: &Auto {type: url-test, url: 'https://1.1.1.1/cdn-cgi/trace', interval: 30, tolerance: 100, timeout: 10000, max-failed-times: 3, expected-status: '200-299', disable-udp: false, lazy: false, hidden: true, include-all: true, exclude-filter: *FilterInfo, empty-fallback: REJECT}
+Auto: &Auto {type: url-test, url: 'http://www.gstatic.com/generate_204', interval: 180, tolerance: 50, timeout: 10000, max-failed-times: 3, expected-status: '204', disable-udp: false, lazy: false, hidden: true, include-all: true, exclude-filter: *FilterInfo, empty-fallback: REJECT}
 DomesticAuto: &DomesticAuto {<<: *Auto, url: 'https://www.baidu.com', expected-status: '200-399'}
-Fallback: &Fallback {type: fallback, url: 'https://1.1.1.1/cdn-cgi/trace', interval: 30, timeout: 10000, lazy: false, expected-status: '200-299', max-failed-times: 3, empty-fallback: REJECT}
+Fallback: &Fallback {type: fallback, url: 'http://www.gstatic.com/generate_204', interval: 180, timeout: 10000, lazy: false, expected-status: '204', max-failed-times: 3, empty-fallback: REJECT}
 
 ### 策略组
 proxy-groups:
-  # DNS 始终从所有可用节点自动选择；此组可能使用倍率节点以保证解析可用。
-  - {name: DNS自动选择, <<: *Auto, filter: *FilterAll}
-  - {name: 全部自动选择, <<: *Auto, filter: *FilterAll, hidden: false}
+  - {name: 全部自动选择, <<: *Auto, filter: *FilterAll, lazy: true, hidden: false}
   - {name: 全部手动选择, <<: *Select}
   # 国外兜底仅在普通与倍率国外组之间切换，不经混合组引入国内节点。
   - {name: 国外自动兜底, <<: *Fallback, proxies: [国外自动选择, 国外倍率自动]}
@@ -228,7 +132,7 @@ proxy-groups:
   - {name: 独立策略, type: select, proxies: [国内自动选择, 国内手动选择, 国外自动选择, 国外手动选择, 国内倍率自动, 国内倍率手动, 国外倍率自动, 国外倍率手动, DIRECT]}
 
   # === 应用策略组 ===
-  # 隐私组默认直连；需要主动阻断时再选择 REJECT，避免宽泛隐私规则误伤。
+  # 隐私组默认遵循国外策略；用户仍可手动选择直连或阻断。
   - {name: 📘 GitHub, type: select, proxies: [国外策略, 国内策略]}
   - {name: 🙋 Telegram, type: select, proxies: [国外策略]}
   - {name: 🕊️ Twitter(X), type: select, proxies: [国外策略]}
@@ -243,7 +147,7 @@ proxy-groups:
   - {name: 🇬🇴 Google, type: select, proxies: [国外策略, 国内策略]}
   - {name: ➡️ 国内, type: select, proxies: [国内策略]}
   - {name: 🌍 国外, type: select, proxies: [国外策略]}
-  - {name: 🔒 隐私, type: select, proxies: [DIRECT, REJECT, 国内策略, 国外策略]}
+  - {name: 🔒 隐私, type: select, proxies: [国外策略, DIRECT, REJECT, 国内策略]}
   - {name: 🐟 漏网之鱼, type: select, proxies: [国外策略, 国内策略, 独立策略, DIRECT]}
 
 ### 规则集定义
@@ -255,7 +159,7 @@ rule-anchor:
   classical_yaml: &classical_yaml {type: http, behavior: classical, format: yaml, interval: 86400, size-limit: 33554432}
 
 ### 分流规则
-# 顺序原则：私网 > 应用专属 > 国内域名 > 隐私兜底 > 国内 IP > 非中国域名 > 最终兜底
+# 顺序原则：本地 > 明确域名 > 隐私 > 应用 IP > 国内 IP > 最终兜底
 rules:
   # 0. 基础本地规则不依赖远程规则集下载成功。
   - DOMAIN,localhost,DIRECT
@@ -279,6 +183,15 @@ rules:
 
   # 私有网络直连，避免 LAN / 本机服务误入代理。
   - RULE-SET,private_domain,DIRECT
+  # 已知 AI 域名优先于 IP 规则，防止异常地址将其归入其他服务。
+  - DOMAIN-SUFFIX,chatgpt.com,🌍 国外
+  - DOMAIN-SUFFIX,openai.com,🌍 国外
+  - DOMAIN-SUFFIX,oaistatic.com,🌍 国外
+  - DOMAIN-SUFFIX,oaiusercontent.com,🌍 国外
+  - DOMAIN-SUFFIX,claude.ai,🌍 国外
+  - DOMAIN-SUFFIX,anthropic.com,🌍 国外
+  # 映射丢失的旧假地址立即失败，避免落入私网直连后等待超时。
+  - IP-CIDR,198.18.0.0/15,REJECT,no-resolve
   - RULE-SET,private_ip,DIRECT,no-resolve
 
   # 1. 应用域名：MRS 主匹配。
@@ -295,12 +208,6 @@ rules:
   - RULE-SET,epic_domain,🕹️ Game (Epic)
   - RULE-SET,ea_domain,🕹️ Game (EA)
 
-  # 2. 有官方专属 IP 集的应用，用 MRS ipcidr 补齐纯 IP 连接。
-  - RULE-SET,telegram_ip,🙋 Telegram,no-resolve
-  - RULE-SET,twitter_ip,🕊️ Twitter(X),no-resolve
-  - RULE-SET,facebook_ip,🗣️ Facebook,no-resolve
-  - RULE-SET,google_ip,🇬🇴 Google,no-resolve
-
   # 3. 中国域名先直连，保持应用专属策略拥有更高优先级。
   - RULE-SET,cn_domain,➡️ 国内
 
@@ -309,11 +216,17 @@ rules:
   - RULE-SET,tracker_domain,🔒 隐私
   - RULE-SET,privacy_classical,🔒 隐私
 
+  # 明确的国外域名先于 IP 判断，避免缓存中的异常地址改变分流。
+  - RULE-SET,geolocation_non_cn,🌍 国外
+
+  # 纯 IP 连接再使用应用 IP 集补齐。
+  - RULE-SET,telegram_ip,🙋 Telegram,no-resolve
+  - RULE-SET,twitter_ip,🕊️ Twitter(X),no-resolve
+  - RULE-SET,facebook_ip,🗣️ Facebook,no-resolve
+  - RULE-SET,google_ip,🇬🇴 Google,no-resolve
+
   # 5. 中国 IP 直连；no-resolve 避免为纯规则匹配触发额外 DNS。
   - RULE-SET,cn_ip,➡️ 国内,no-resolve
-
-  # 6. 非中国域名统一国外策略，替代旧 Global + Global_Domain 两套大列表。
-  - RULE-SET,geolocation_non_cn,🌍 国外
 
   # 7. 无法归类的连接保留人工可控兜底。
   - MATCH,🐟 漏网之鱼
