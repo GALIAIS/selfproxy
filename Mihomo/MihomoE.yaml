@@ -3,7 +3,7 @@
 ### 规则架构：MetaCubeX MRS 承担大规模 domain/ipcidr；Classical 保留隐私规则
 ### 本文件与原文件一样是核心模板，不含真实节点；请由客户端合并订阅，或填写下方 provider 示例。
 ### DNS 与嗅探由本模板管理；导入客户端时应关闭对应覆写，避免解析模式或上游被混合。
-### DNS 字段以 Mihomo v1.19.27 为基线；私有域名上游须按实际局域网调整。
+### DNS 字段以 Mihomo v1.19.27 为基线；私有域名自动使用系统配置的 DNS。
 ### IPv4 基线：若节点仅支持 IPv6，须结合实际 IPv6/TUN 网络单独调整，不能通用地强开。
 ### proxy-providers 的健康检查需自行配置；默认按需检测，地区自动组负责主动检测。
 ### 单一测试目标的可达性不等于所有网站可达；配置无法消除上游故障、网络限制或应用自身故障。
@@ -65,9 +65,9 @@ dns:
   direct-nameserver-follow-policy: true
 
   nameserver-policy:
-    # 当前物理网卡的路由器 DNS；更换局域网时修改此处，不得填 TUN 假地址或本核心监听地址。
+    # 自动读取系统 DNS；内核会排除自身 TUN DNS，上游列表约每 5 分钟刷新。
     '+.lan': &LocalDNS
-      - 'udp://192.168.1.1:53#DIRECT'
+      - 'system'
     '+.local': *LocalDNS
     '+.localdomain': *LocalDNS
     '+.internal': *LocalDNS
