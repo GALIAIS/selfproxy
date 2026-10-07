@@ -1,0 +1,489 @@
+### MihomoE - 2026-10-07 完整 DNS / 严格节点分组版
+### 目标：Android / Windows / macOS / Linux 共用核心配置
+### 规则架构：MetaCubeX MRS 承担大规模 domain/ipcidr；Classical 保留隐私规则
+### 本文件与原文件一样是核心模板，不含真实节点；请由客户端合并订阅，或填写下方 provider 示例。
+### DNS 与嗅探由本模板管理；导入客户端时应关闭对应覆写，避免解析模式或上游被混合。
+### DNS 字段以 Mihomo v1.19.27 为基线；私有域名上游须按实际局域网调整。
+### IPv4 基线：若节点仅支持 IPv6，须结合实际 IPv6/TUN 网络单独调整，不能通用地强开。
+### proxy-providers 的健康检查需自行配置；默认按需检测，地区自动组负责主动检测。
+### 单一测试目标的可达性不等于所有网站可达；配置无法消除上游故障、网络限制或应用自身故障。
+
+### 全局配置
+mixed-port: 7897
+allow-lan: false
+mode: rule
+log-level: warning
+ipv6: false
+find-process-mode: strict  # 桌面端保留进程匹配；路由器场景才建议 off
+
+profile:
+  store-selected: true
+  # fake-IP 模式下保存映射；切换模式或工作目录时须同步清理应用和核心缓存。
+  store-fake-ip: true
+
+unified-delay: true
+tcp-concurrent: true
+
+### Hosts
+hosts:
+  'localhost': 127.0.0.1
+  # 不预设 router.local 的地址；需要静态映射时填写自己路由器的真实 LAN 地址。
+
+### DNS
+dns:
+  enable: true
+  listen: 127.0.0.1:1053
+  ipv6: false
+  prefer-h3: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-ttl: 60
+  fake-ip-filter-mode: blacklist
+  cache-algorithm: arc
+  cache-max-size: 4096
+  use-hosts: true
+  use-system-hosts: true
+  respect-rules: true
+
+  # 仅引导 DoH 服务器域名；不经 DNS 代理组，避免启动时循环依赖。
+  default-nameserver:
+    - '223.5.5.5#DIRECT'
+    - '119.29.29.29#DIRECT'
+
+  # 节点入口域名独立直连解析，不依赖节点自身或国外策略的手动选择。
+  proxy-server-nameserver: &DomesticDNS
+    - 'https://223.5.5.5/dns-query#DIRECT'
+    - 'https://doh.pub/dns-query#DIRECT'
+
+  # 两个海外加密上游均经 DNS 策略；不将国内回答与海外回答混合竞争。
+  nameserver: &ForeignDNS
+    - 'https://1.1.1.1/dns-query#DNS策略'
+    - 'https://8.8.8.8/dns-query#DNS策略'
+
+  direct-nameserver: *DomesticDNS
+  # 私有域名仍走局域网上游；显式海外域名保持可信解析，即使业务流量选了 DIRECT。
+  direct-nameserver-follow-policy: true
+
+  nameserver-policy:
+    # 当前物理网卡的路由器 DNS；更换局域网时修改此处，不得填 TUN 假地址或本核心监听地址。
+    '+.lan': &LocalDNS
+      - 'udp://192.168.1.1:53#DIRECT'
+    '+.local': *LocalDNS
+    '+.localdomain': *LocalDNS
+    '+.internal': *LocalDNS
+    '+.home.arpa': *LocalDNS
+    'localhost': *LocalDNS
+    'rule-set:private_domain': *LocalDNS
+
+    # 明确海外服务优先于宽泛地区规则。
+    '+.chatgpt.com': *ForeignDNS
+    '+.openai.com': *ForeignDNS
+    '+.oaistatic.com': *ForeignDNS
+    '+.oaiusercontent.com': *ForeignDNS
+    '+.claude.ai': *ForeignDNS
+    '+.anthropic.com': *ForeignDNS
+
+    # 规则更新、解析上游和系统联网检查可在海外节点尚未就绪时解析。
+    '+.jsdelivr.net': *DomesticDNS
+    '+.doh.pub': *DomesticDNS
+    '+.alidns.com': *DomesticDNS
+    'dns.msftncsi.com': *DomesticDNS
+    'www.msftncsi.com': *DomesticDNS
+    'www.msftconnecttest.com': *DomesticDNS
+    'time.windows.com': *DomesticDNS
+    'time.apple.com': *DomesticDNS
+    '+.pool.ntp.org': *DomesticDNS
+    '+.ntp.org.cn': *DomesticDNS
+
+    'rule-set:cn_domain': *DomesticDNS
+    '+.cn': *DomesticDNS
+    'rule-set:geolocation_non_cn': *ForeignDNS
+
+  # 需要真实地址的局域网、时间同步、联网检查和 STUN/TURN 服务。
+  fake-ip-filter:
+    - 'rule-set:private_domain'
+    - '+.lan'
+    - '+.local'
+    - '+.localdomain'
+    - '+.internal'
+    - '+.home.arpa'
+    - 'localhost'
+    - 'dns.msftncsi.com'
+    - 'www.msftncsi.com'
+    - 'www.msftconnecttest.com'
+    - 'time.*.com'
+    - 'ntp.*.com'
+    - '+.pool.ntp.org'
+    - '+.ntp.org.cn'
+    - 'stun.*.*'
+    - 'stun.*.*.*'
+    - '+.stun.*.*'
+    - '+.stun.*.*.*'
+    - 'turn.*.*'
+    - 'turn.*.*.*'
+    - '+.turn.*.*'
+    - '+.turn.*.*.*'
+    - 'webrtc.*.*'
+    - 'webrtc.*.*.*'
+    - '*.srv.nintendo.net'
+    - '*.stun.playstation.net'
+    - 'xbox.*.microsoft.com'
+    - '*.xboxlive.com'
+    - 'lancache.steamcontent.com'
+    - '+.market.xiaomi.com'
+    - '+.push.apple.com'
+
+### 域名嗅探
+sniffer:
+  enable: true
+  # 使用可识别的域名连接目标，避免异常解析地址继续作为代理目的地。
+  override-destination: true
+  parse-pure-ip: true
+  force-dns-mapping: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+      override-destination: true
+    QUIC:
+      ports: [443, 8443]
+      override-destination: true
+  skip-domain:
+    - dlg.io.mi.com
+    - '+.push.apple.com'
+
+### TUN 配置
+tun:
+  enable: true
+  stack: mixed
+  # 避免采用巨帧默认值；特殊链路仍需按实际 MTU 调整。
+  mtu: 1500
+  dns-hijack:
+    - 'any:53'
+    - 'tcp://any:53'
+  udp-timeout: 300
+  auto-route: true
+  # Linux / Android 可利用 auto-redirect；Windows / macOS 不依赖此项。
+  # 保留该字段可让同一份配置在支持的平台获得优化，而不固定平台网卡名。
+  auto-redirect: true
+  auto-detect-interface: true
+  # Windows 可抑制多宿主 DNS 泄漏；Android 同样有利于 DNS 劫持。
+  # 若 Windows 上 VirtualBox/特殊虚拟网卡冲突，可单独改为 false。
+  strict-route: true
+
+### 订阅健康检查默认值
+# 如果使用 proxy-providers，每个实际 provider 都应继承此模板或写入相同 health-check。
+# 客户端动态注入的 provider 不会自动继承它，需要在客户端覆写其 health-check。
+NodeParam: &NodeParam
+  type: http
+  interval: 86400
+  health-check:
+    enable: true
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    timeout: 10000
+    lazy: true
+    expected-status: '204'
+
+# 原文件没有订阅地址；按实际情况启用，勿把占位链接当作有效订阅。
+# proxy-providers:
+#   订阅1:
+#     <<: *NodeParam
+#     url: '填入你的真实订阅地址'
+#     path: ./proxy_provider/provider1.yaml
+#     proxy: DIRECT
+
+### 节点筛选
+# 国内只匹配明确的国家标签；CN2、BGP、中转、自建不代表出口在中国大陆。
+# CN 后接汉字时不存在 Unicode 单词边界；使用 ASCII 标签边界，同时避免将 CN2 当作国内标签。
+# 国外须有明确地区标签；缺标签节点仅出现在“全部”组。
+FilterInfo: &FilterInfo '(?i)剩余流量|距离下次重置|套餐到期|过期|https?://|(?:官网|客服|订阅地址|返利|邀请|套餐|重置|公告|通知|群组|电报群|工单|频道)\s*[:：@]|^建议\s*[:：]|^没网更新订阅|^[-=]{2,}'
+# 所有节点组统一通过 exclude-filter 排除提示条目，避免两份排除规则不同步。
+FilterAll: &FilterAll '.*'
+FilterGlobal_All: &FilterGlobal_All '^(?=.*(?:香港|澳门|台湾|日本|韩国|新加坡|美国|英国|德国|法国|荷兰|印度|罗马|悉尼|澳大利亚|澳洲|加拿大|俄罗斯|土耳其|巴西|阿根廷|南非|泰国|越南|菲律宾|马来西亚|印尼|印度尼西亚|瑞士|瑞典|挪威|芬兰|丹麦|意大利|西班牙|葡萄牙|波兰|乌克兰|以色列|阿联酋|迪拜|新西兰|墨西哥|爱尔兰|奥地利|比利时|捷克|匈牙利|罗马尼亚|希腊|冰岛|卢森堡|柬埔寨|缅甸|巴基斯坦|孟加拉|尼泊尔|斯里兰卡|沙特|埃及|尼日利亚|肯尼亚|智利|秘鲁|哥伦比亚|🇭🇰|🇲🇴|🇹🇼|🇯🇵|🇰🇷|🇸🇬|🇺🇸|🇬🇧|🇩🇪|🇫🇷|🇳🇱|🇨🇦|🇦🇺|🇮🇳|(?i:(?<![A-Za-z0-9])(?:HK|Hong[ -]?Kong|MO|Macau|Macao|TW|Taiwan|JP|Japan|KR|Korea|SG|Singapore|US|USA|United[ -]?States|UK|GB|Britain|United[ -]?Kingdom|DE|Germany|FR|France|NL|Netherlands|IN|India|AU|Australia|CA|Canada|RU|Russia|TR|Turkey|BR|Brazil|TH|Thailand|VN|Vietnam|PH|Philippines|MY|Malaysia|ID|Indonesia|CH|Switzerland|SE|Sweden|NO|Norway|FI|Finland|DK|Denmark|IT|Italy|ES|Spain|PT|Portugal|PL|Poland|NZ|New[ -]?Zealand|AE|UAE|Dubai|IE|Ireland|AT|Austria|BE|Belgium|CZ|Czech)(?![A-Za-z0-9]))))(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9])))).*$'
+FilterGlobal: &FilterGlobal '^(?=.*(?:香港|澳门|台湾|日本|韩国|新加坡|美国|英国|德国|法国|荷兰|印度|罗马|悉尼|澳大利亚|澳洲|加拿大|俄罗斯|土耳其|巴西|阿根廷|南非|泰国|越南|菲律宾|马来西亚|印尼|印度尼西亚|瑞士|瑞典|挪威|芬兰|丹麦|意大利|西班牙|葡萄牙|波兰|乌克兰|以色列|阿联酋|迪拜|新西兰|墨西哥|爱尔兰|奥地利|比利时|捷克|匈牙利|罗马尼亚|希腊|冰岛|卢森堡|柬埔寨|缅甸|巴基斯坦|孟加拉|尼泊尔|斯里兰卡|沙特|埃及|尼日利亚|肯尼亚|智利|秘鲁|哥伦比亚|🇭🇰|🇲🇴|🇹🇼|🇯🇵|🇰🇷|🇸🇬|🇺🇸|🇬🇧|🇩🇪|🇫🇷|🇳🇱|🇨🇦|🇦🇺|🇮🇳|(?i:(?<![A-Za-z0-9])(?:HK|Hong[ -]?Kong|MO|Macau|Macao|TW|Taiwan|JP|Japan|KR|Korea|SG|Singapore|US|USA|United[ -]?States|UK|GB|Britain|United[ -]?Kingdom|DE|Germany|FR|France|NL|Netherlands|IN|India|AU|Australia|CA|Canada|RU|Russia|TR|Turkey|BR|Brazil|TH|Thailand|VN|Vietnam|PH|Philippines|MY|Malaysia|ID|Indonesia|CH|Switzerland|SE|Sweden|NO|Norway|FI|Finland|DK|Denmark|IT|Italy|ES|Spain|PT|Portugal|PL|Poland|NZ|New[ -]?Zealand|AE|UAE|Dubai|IE|Ireland|AT|Austria|BE|Belgium|CZ|Czech)(?![A-Za-z0-9]))))(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+FilterCN: &FilterCN '^(?=.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?!.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+FilterGlobal_Multiplier: &FilterGlobal_Multiplier '^(?=.*(?:香港|澳门|台湾|日本|韩国|新加坡|美国|英国|德国|法国|荷兰|印度|罗马|悉尼|澳大利亚|澳洲|加拿大|俄罗斯|土耳其|巴西|阿根廷|南非|泰国|越南|菲律宾|马来西亚|印尼|印度尼西亚|瑞士|瑞典|挪威|芬兰|丹麦|意大利|西班牙|葡萄牙|波兰|乌克兰|以色列|阿联酋|迪拜|新西兰|墨西哥|爱尔兰|奥地利|比利时|捷克|匈牙利|罗马尼亚|希腊|冰岛|卢森堡|柬埔寨|缅甸|巴基斯坦|孟加拉|尼泊尔|斯里兰卡|沙特|埃及|尼日利亚|肯尼亚|智利|秘鲁|哥伦比亚|🇭🇰|🇲🇴|🇹🇼|🇯🇵|🇰🇷|🇸🇬|🇺🇸|🇬🇧|🇩🇪|🇫🇷|🇳🇱|🇨🇦|🇦🇺|🇮🇳|(?i:(?<![A-Za-z0-9])(?:HK|Hong[ -]?Kong|MO|Macau|Macao|TW|Taiwan|JP|Japan|KR|Korea|SG|Singapore|US|USA|United[ -]?States|UK|GB|Britain|United[ -]?Kingdom|DE|Germany|FR|France|NL|Netherlands|IN|India|AU|Australia|CA|Canada|RU|Russia|TR|Turkey|BR|Brazil|TH|Thailand|VN|Vietnam|PH|Philippines|MY|Malaysia|ID|Indonesia|CH|Switzerland|SE|Sweden|NO|Norway|FI|Finland|DK|Denmark|IT|Italy|ES|Spain|PT|Portugal|PL|Poland|NZ|New[ -]?Zealand|AE|UAE|Dubai|IE|Ireland|AT|Austria|BE|Belgium|CZ|Czech)(?![A-Za-z0-9]))))(?!.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+FilterCN_Multiplier: &FilterCN_Multiplier '^(?=.*(?:中国|大陆|🇨🇳|(?i:(?<![A-Za-z0-9])(?:CN|China|Mainland)(?![A-Za-z0-9]))))(?=.*(?:[xX×✕*]\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*[xX×✕]|\d+(?:\.\d+)?\s*倍|倍率)).*$'
+
+Select: &Select {type: select, disable-udp: false, hidden: false, include-all: true, exclude-filter: *FilterInfo, empty-fallback: REJECT}
+# HTTP 204 检测不依赖内核的 HTTPS 测速行为；DNS 组另用 IP 地址检测以避免循环依赖。
+# max-failed-times 是触发强制健康检查的连接失败计数，不是测速连续失败重试次数。
+Auto: &Auto {type: url-test, url: 'http://www.gstatic.com/generate_204', interval: 180, tolerance: 50, timeout: 10000, max-failed-times: 3, expected-status: '204', disable-udp: false, lazy: false, hidden: true, include-all: true, exclude-filter: *FilterInfo, empty-fallback: REJECT}
+DomesticAuto: &DomesticAuto {<<: *Auto, url: 'https://www.baidu.com', expected-status: '200-399'}
+Fallback: &Fallback {type: fallback, url: 'http://www.gstatic.com/generate_204', interval: 180, timeout: 10000, lazy: false, expected-status: '204', max-failed-times: 3, empty-fallback: REJECT}
+
+### 策略组
+proxy-groups:
+  # DNS 自动兜底直接使用节点，不依赖业务自动组的域名测速结果。
+  # IP + HTTP 不需要 DNS 或 TLS；此项只判断代理路径，不等价于 DoH 查询成功。
+  - {name: DNS自动兜底, type: fallback, include-all: true, filter: *FilterGlobal_All, exclude-filter: *FilterInfo, url: 'http://1.1.1.1/cdn-cgi/trace', expected-status: '200-399', interval: 180, timeout: 10000, lazy: false, max-failed-times: 3, empty-fallback: REJECT, hidden: true}
+  - {name: DNS策略, type: select, proxies: [DNS自动兜底, 国外手动选择, 国外倍率手动]}
+  - {name: 全部自动选择, <<: *Auto, filter: *FilterAll, lazy: true, hidden: false}
+  - {name: 全部手动选择, <<: *Select}
+  # 国外兜底仅在普通与倍率国外组之间切换，不经混合组引入国内节点。
+  - {name: 国外自动兜底, <<: *Fallback, proxies: [国外自动选择, 国外倍率自动]}
+  # === 基础节点分组 ===
+  - {name: 国内策略, type: select, proxies: [DIRECT, 国内自动选择, 国内手动选择, 国内倍率自动, 国内倍率手动]}
+  - {name: 国内自动选择, <<: *DomesticAuto, filter: *FilterCN}
+  - {name: 国内手动选择, <<: *Select, filter: *FilterCN}
+
+  - {name: 国外策略, type: select, proxies: [国外自动兜底, 国外自动选择, 国外手动选择, 国外倍率自动, 国外倍率手动, 全部手动选择, DIRECT]}
+  - {name: 国外自动选择, <<: *Auto, filter: *FilterGlobal}
+  - {name: 国外手动选择, <<: *Select, filter: *FilterGlobal}
+
+  # === 倍率节点分组 ===
+  - {name: 国内倍率自动, <<: *DomesticAuto, filter: *FilterCN_Multiplier}
+  - {name: 国内倍率手动, <<: *Select, filter: *FilterCN_Multiplier}
+  - {name: 国外倍率自动, <<: *Auto, filter: *FilterGlobal_Multiplier}
+  - {name: 国外倍率手动, <<: *Select, filter: *FilterGlobal_Multiplier}
+
+  # 独立策略
+  - {name: 独立策略, type: select, proxies: [国内自动选择, 国内手动选择, 国外自动选择, 国外手动选择, 国内倍率自动, 国内倍率手动, 国外倍率自动, 国外倍率手动, DIRECT]}
+
+  # === 应用策略组 ===
+  # 隐私组默认遵循国外策略；用户仍可手动选择直连或阻断。
+  - {name: 📘 GitHub, type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🙋 Telegram, type: select, proxies: [国外策略]}
+  - {name: 🕊️ Twitter(X), type: select, proxies: [国外策略]}
+  - {name: 🗣️ Facebook, type: select, proxies: [国外策略]}
+  - {name: 🌳 Amazon, type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🍎 Apple, type: select, proxies: [国外策略, 国内策略]}
+  - {name: Ⓜ️ Microsoft, type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🎮 Steam, type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🕹️ Game (Epic), type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🕹️ Game (EA), type: select, proxies: [国外策略, 国内策略]}
+  - {name: 🎞️ YouTube, type: select, proxies: [国外策略]}
+  - {name: 🇬🇴 Google, type: select, proxies: [国外策略, 国内策略]}
+  - {name: ➡️ 国内, type: select, proxies: [国内策略]}
+  - {name: 🌍 国外, type: select, proxies: [国外策略]}
+  - {name: 🔒 隐私, type: select, proxies: [国外策略, DIRECT, REJECT, 国内策略]}
+  - {name: 🐟 漏网之鱼, type: select, proxies: [国外策略, 国内策略, 独立策略, DIRECT]}
+
+### 规则集定义
+# MRS 只用于 domain / ipcidr；复杂混合规则继续使用 classical。
+# MRS 下载使用 MetaCubeX 官方规则源的 JSDelivr-CF 镜像，避免 rule-provider proxy 的启动循环依赖。
+rule-anchor:
+  mrs_domain: &mrs_domain {type: http, behavior: domain, format: mrs, interval: 86400, size-limit: 33554432}
+  mrs_ip: &mrs_ip {type: http, behavior: ipcidr, format: mrs, interval: 86400, size-limit: 33554432}
+  classical_yaml: &classical_yaml {type: http, behavior: classical, format: yaml, interval: 86400, size-limit: 33554432}
+
+### 分流规则
+# 顺序原则：本地 > 明确域名 > 隐私 > 应用 IP > 国内 IP > 最终兜底
+rules:
+  # 0. 基础本地规则不依赖远程规则集下载成功。
+  - DOMAIN,localhost,DIRECT
+  # Windows 联网状态检测走实际直连网络，不依赖国外代理组。
+  - DOMAIN,dns.msftncsi.com,DIRECT
+  - DOMAIN,www.msftncsi.com,DIRECT
+  - DOMAIN,www.msftconnecttest.com,DIRECT
+  - DOMAIN-SUFFIX,lan,DIRECT
+  - DOMAIN-SUFFIX,local,DIRECT
+  - DOMAIN-SUFFIX,localdomain,DIRECT
+  - DOMAIN-SUFFIX,internal,DIRECT
+  - DOMAIN-SUFFIX,home.arpa,DIRECT
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,169.254.0.0/16,DIRECT,no-resolve
+  - IP-CIDR6,::1/128,DIRECT,no-resolve
+  - IP-CIDR6,fc00::/7,DIRECT,no-resolve
+  - IP-CIDR6,fe80::/10,DIRECT,no-resolve
+
+  # 私有网络直连，避免 LAN / 本机服务误入代理。
+  - RULE-SET,private_domain,DIRECT
+  # 已知 AI 域名优先于 IP 规则，防止异常地址将其归入其他服务。
+  - DOMAIN-SUFFIX,chatgpt.com,🌍 国外
+  - DOMAIN-SUFFIX,openai.com,🌍 国外
+  - DOMAIN-SUFFIX,oaistatic.com,🌍 国外
+  - DOMAIN-SUFFIX,oaiusercontent.com,🌍 国外
+  - DOMAIN-SUFFIX,claude.ai,🌍 国外
+  - DOMAIN-SUFFIX,anthropic.com,🌍 国外
+  # 映射丢失的旧假地址立即失败，避免落入私网直连后等待超时。
+  - IP-CIDR,198.18.0.0/15,REJECT,no-resolve
+  - RULE-SET,private_ip,DIRECT,no-resolve
+
+  # 1. 应用域名：MRS 主匹配。
+  - RULE-SET,github_domain,📘 GitHub
+  - RULE-SET,telegram_domain,🙋 Telegram
+  - RULE-SET,twitter_domain,🕊️ Twitter(X)
+  - RULE-SET,facebook_domain,🗣️ Facebook
+  - RULE-SET,youtube_domain,🎞️ YouTube
+  - RULE-SET,amazon_domain,🌳 Amazon
+  - RULE-SET,apple_domain,🍎 Apple
+  - RULE-SET,microsoft_domain,Ⓜ️ Microsoft
+  - RULE-SET,google_domain,🇬🇴 Google
+  - RULE-SET,steam_domain,🎮 Steam
+  - RULE-SET,epic_domain,🕹️ Game (Epic)
+  - RULE-SET,ea_domain,🕹️ Game (EA)
+
+  # 3. 中国域名先直连，保持应用专属策略拥有更高优先级。
+  - RULE-SET,cn_domain,➡️ 国内
+
+  # 4. 隐私规则采用“快速域名 MRS + Classical 复杂规则兜底”。
+  # tracker_domain 来自 MetaCubeX tracker；Privacy_Classical 保留 DOMAIN/IP/其他 classical 能力。
+  - RULE-SET,tracker_domain,🔒 隐私
+  - RULE-SET,privacy_classical,🔒 隐私
+
+  # 明确的国外域名先于 IP 判断，避免缓存中的异常地址改变分流。
+  - RULE-SET,geolocation_non_cn,🌍 国外
+
+  # 纯 IP 连接再使用应用 IP 集补齐。
+  - RULE-SET,telegram_ip,🙋 Telegram,no-resolve
+  - RULE-SET,twitter_ip,🕊️ Twitter(X),no-resolve
+  - RULE-SET,facebook_ip,🗣️ Facebook,no-resolve
+  - RULE-SET,google_ip,🇬🇴 Google,no-resolve
+
+  # 5. 中国 IP 直连；no-resolve 避免为纯规则匹配触发额外 DNS。
+  - RULE-SET,cn_ip,➡️ 国内,no-resolve
+
+  # 7. 无法归类的连接保留人工可控兜底。
+  - MATCH,🐟 漏网之鱼
+
+### 规则集
+rule-providers:
+  # ==================== 基础网络 ====================
+  private_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs
+    path: ./ruleset/private_domain.mrs
+    path-in-bundle: geo/geosite/private.mrs
+
+  private_ip:
+    <<: *mrs_ip
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/private.mrs
+    path: ./ruleset/private_ip.mrs
+    path-in-bundle: geo/geoip/private.mrs
+
+  # ==================== 应用域名 MRS ====================
+  github_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/github.mrs
+    path: ./ruleset/github_domain.mrs
+    path-in-bundle: geo/geosite/github.mrs
+
+  telegram_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/telegram.mrs
+    path: ./ruleset/telegram_domain.mrs
+    path-in-bundle: geo/geosite/telegram.mrs
+
+  twitter_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/twitter.mrs
+    path: ./ruleset/twitter_domain.mrs
+    path-in-bundle: geo/geosite/twitter.mrs
+
+  facebook_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/facebook.mrs
+    path: ./ruleset/facebook_domain.mrs
+    path-in-bundle: geo/geosite/facebook.mrs
+
+  youtube_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/youtube.mrs
+    path: ./ruleset/youtube_domain.mrs
+    path-in-bundle: geo/geosite/youtube.mrs
+
+  amazon_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/amazon.mrs
+    path: ./ruleset/amazon_domain.mrs
+    path-in-bundle: geo/geosite/amazon.mrs
+
+  apple_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/apple.mrs
+    path: ./ruleset/apple_domain.mrs
+    path-in-bundle: geo/geosite/apple.mrs
+
+  microsoft_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/microsoft.mrs
+    path: ./ruleset/microsoft_domain.mrs
+    path-in-bundle: geo/geosite/microsoft.mrs
+
+  google_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/google.mrs
+    path: ./ruleset/google_domain.mrs
+    path-in-bundle: geo/geosite/google.mrs
+
+  steam_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/steam.mrs
+    path: ./ruleset/steam_domain.mrs
+    path-in-bundle: geo/geosite/steam.mrs
+
+  epic_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/epicgames.mrs
+    path: ./ruleset/epic_domain.mrs
+    path-in-bundle: geo/geosite/epicgames.mrs
+
+  ea_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/ea.mrs
+    path: ./ruleset/ea_domain.mrs
+    path-in-bundle: geo/geosite/ea.mrs
+
+  # ==================== 应用 IP MRS ====================
+  telegram_ip:
+    <<: *mrs_ip
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/telegram.mrs
+    path: ./ruleset/telegram_ip.mrs
+    path-in-bundle: geo/geoip/telegram.mrs
+
+  twitter_ip:
+    <<: *mrs_ip
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/twitter.mrs
+    path: ./ruleset/twitter_ip.mrs
+    path-in-bundle: geo/geoip/twitter.mrs
+
+  facebook_ip:
+    <<: *mrs_ip
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/facebook.mrs
+    path: ./ruleset/facebook_ip.mrs
+    path-in-bundle: geo/geoip/facebook.mrs
+
+  google_ip:
+    <<: *mrs_ip
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/google.mrs
+    path: ./ruleset/google_ip.mrs
+    path-in-bundle: geo/geoip/google.mrs
+
+  # ==================== 大型基础分流 MRS ====================
+  cn_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs
+    path: ./ruleset/cn_domain.mrs
+    path-in-bundle: geo/geosite/cn.mrs
+
+  cn_ip:
+    <<: *mrs_ip
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs
+    path: ./ruleset/cn_ip.mrs
+    path-in-bundle: geo/geoip/cn.mrs
+
+  geolocation_non_cn:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs
+    path: ./ruleset/geolocation_non_cn.mrs
+    path-in-bundle: geo/geosite/geolocation-!cn.mrs
+
+  tracker_domain:
+    <<: *mrs_domain
+    url: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/tracker.mrs
+    path: ./ruleset/tracker_domain.mrs
+    path-in-bundle: geo/geosite/tracker.mrs
+
+  # ==================== Classical 复杂规则兜底 ====================
+  # MRS 无法表达 classical 中混合的 DOMAIN / IP-CIDR / 其他规则，因此只保留这一层。
+  privacy_classical:
+    <<: *classical_yaml
+    url: https://testingcf.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Privacy/Privacy_Classical.yaml
+    path: ./ruleset/privacy_classical.yaml
